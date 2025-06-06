@@ -59,6 +59,20 @@ export default function Home() {
     setChatMessages([...updatedMessages, { role: "assistant", content: data?.result || "No response" }]);
   };
 
+  const handleSaveScene = async () => {
+    const res = await fetch("/api/save-scene", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sceneData }),
+    });
+  
+    if (res.ok) {
+      alert("Scene saved successfully!");
+    } else {
+      alert("Failed to save scene.");
+    }
+  };
+
   return (
     <main className="flex flex-col h-screen bg-gray-50 text-gray-900">
       {/* Header */}
@@ -91,7 +105,11 @@ export default function Home() {
             {analysisResponse}
           </pre> */}
           <div className="w-full h-120 mt-4 border border-gray-300 rounded">
-            <SceneCanvas sceneData={sceneData} />
+            <SceneCanvas 
+              sceneData={sceneData}
+              selectedIndex={selectedIndex}
+              onSelect={(index) => setSelectedIndex(index)} 
+            />
           </div>
           <div className="mt-6">
             <h3 className="text-md font-medium mb-2">Edit Object</h3>
@@ -148,6 +166,14 @@ export default function Home() {
               >
                 ⬆️ Move Y
               </button>
+
+              <button
+                onClick={handleSaveScene}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+              >
+                💾 Save Scene
+              </button>
+
             </div>
           </div>
         </div>
