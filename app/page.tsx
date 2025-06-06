@@ -1,11 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SceneCanvas from "@/app/ui/SceneCanvas";
+
+type SceneItem = {
+  type: "box" | "model";
+  path?: string; // for models
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: [number, number, number];
+  color?: string; // for boxes
+};
+
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [analysisResponse, setAnalysisResponse] = useState("");
   const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [sceneData, setSceneData] = useState<SceneItem[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  useEffect(() => {
+    fetch("/scene.json")
+      .then((res) => res.json())
+      .then((data) => setSceneData(data));
+  }, []);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -68,9 +87,69 @@ export default function Home() {
         {/* Left Panel: Analysis Result */}
         <div className="w-2/3 p-6 overflow-auto border-r border-gray-200 bg-white">
           <h2 className="font-semibold text-lg mb-2">Image Analysis Result</h2>
-          <pre className="bg-gray-100 p-4 rounded text-gray-800 whitespace-pre-wrap">
+          {/* <pre className="bg-gray-100 p-4 rounded text-gray-800 whitespace-pre-wrap">
             {analysisResponse}
-          </pre>
+          </pre> */}
+          <div className="w-full h-120 mt-4 border border-gray-300 rounded">
+            <SceneCanvas sceneData={sceneData} />
+          </div>
+          <div className="mt-6">
+            <h3 className="text-md font-medium mb-2">Edit Object</h3>
+
+            {/* Object Selector */}
+            <select
+              value={selectedIndex}
+              onChange={(e) => setSelectedIndex(Number(e.target.value))}
+              className="mb-2 border rounded px-2 py-1"
+            >
+              {sceneData.map((obj, index) => (
+                <option key={index} value={index}>
+                  {obj.type} {index}
+                </option>
+              ))}
+            </select>
+
+            {/* Controls */}
+            <div className="flex gap-2">
+              <button
+                onClick={() =>
+                  setSceneData((prev) => {
+                    const updated = [...prev];
+                    if (updated[selectedIndex] && updated[selectedIndex].position) {
+                      const [x, y, z] = updated[selectedIndex].position!;
+                      updated[selectedIndex] = {
+                        ...updated[selectedIndex],
+                        position: [x + 1, y, z],
+                      };
+                    }
+                    return updated;
+                  })
+                }
+                className="px-3 py-1 bg-gray-700 text-white rounded"
+              >
+                ➡️ Move X
+              </button>
+
+              <button
+                onClick={() =>
+                  setSceneData((prev) => {
+                    const updated = [...prev];
+                    if (updated[selectedIndex] && updated[selectedIndex].position) {
+                      const [x, y, z] = updated[selectedIndex].position!;
+                      updated[selectedIndex] = {
+                        ...updated[selectedIndex],
+                        position: [x, y + 1, z],
+                      };
+                    }
+                    return updated;
+                  })
+                }
+                className="px-3 py-1 bg-gray-700 text-white rounded"
+              >
+                ⬆️ Move Y
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right Panel: Chatbot */}

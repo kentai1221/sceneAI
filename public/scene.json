@@ -1,0 +1,16 @@
+[
+  {
+    "type": "box",
+    "position": [0, 1, 0],
+    "rotation": [0.4, 0.2, 0],
+    "color": "royalblue",
+    "scale": [1, 1, 1]
+  },
+  {
+    "type": "model",
+    "path": "/models/kitchen_tools_pack.glb",
+    "position": [2, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": [1, 1, 1]
+  }
+]
