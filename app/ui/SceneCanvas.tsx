@@ -31,9 +31,9 @@ function SelectionRing({ radius = 1 }: { radius?: number }) {
 // 🔷 Box Component
 function Box({
   position = [0, 0, 0],
-  rotation,
-  color,
+  rotation = [0, 0, 0],
   scale = [1, 1, 1],
+  color = "gray",
   onClick,
   isSelected,
 }: Partial<SceneItem> & { onClick?: () => void; isSelected?: boolean }) {
@@ -50,6 +50,7 @@ function Box({
     }
   }, [scale]);
 
+  // 🔁 Update ring position every frame
   useFrame(() => {
     if (isSelected && groupRef.current && ringRef.current) {
       const box = new THREE.Box3().setFromObject(groupRef.current);
@@ -57,16 +58,14 @@ function Box({
       box.getCenter(center);
       const ringY = box.min.y + 0.01;
 
-      // Set position manually in world space
       ringRef.current.position.set(center.x, ringY, center.z);
-
-      // Ensure ring stays flat and unrotated
       ringRef.current.rotation.set(-Math.PI / 2, 0, 0);
     }
   });
 
   return (
     <>
+      {/* The object */}
       <group
         ref={groupRef}
         position={position}
@@ -76,10 +75,11 @@ function Box({
       >
         <mesh>
           <boxGeometry />
-          <meshStandardMaterial color={color || "gray"} />
+          <meshStandardMaterial color={color} />
         </mesh>
       </group>
 
+      {/* The ring rendered separately, in world space */}
       {isSelected && (
         <mesh ref={ringRef}>
           <ringGeometry args={[radius * 0.9, radius, 32]} />
@@ -159,38 +159,47 @@ function Model({
     position: [number, number, number];
   }>({ radius: 1, position: [0, 0, 0] });
 
+  const ringRef = useRef<THREE.Mesh>(null);
+  const [radius, setRadius] = useState(1);
+
   useEffect(() => {
     if (groupRef.current) {
       const box = new THREE.Box3().setFromObject(groupRef.current);
       const size = new THREE.Vector3();
-      const center = new THREE.Vector3();
       box.getSize(size);
-      box.getCenter(center);
-
-      const radius = Math.max(size.x, size.z) / 2;
-      const ringY = box.min.y + 0.01;
-
-      setRingProps({
-        radius,
-        position: [center.x, ringY, center.z],
-      });
+      setRadius(Math.max(size.x, size.z) / 2);
     }
   }, [scene]);
+
+  useFrame(() => {
+    if (isSelected && groupRef.current && ringRef.current) {
+      const box = new THREE.Box3().setFromObject(groupRef.current);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      const ringY = box.min.y + 0.01;
+
+      ringRef.current.position.set(center.x, ringY, center.z);
+      ringRef.current.rotation.set(-Math.PI / 2, 0, 0);
+    }
+  });
 
   if (!scene) return null;
 
   return (
-    <group
-      ref={groupRef}
-      position={position}
-      rotation={rotation}
-      scale={scale}
-      onClick={onClick}
-    >
-      <primitive object={scene} />
+    <>
+      <group
+        ref={groupRef}
+        position={position}
+        rotation={rotation}
+        scale={scale}
+        onClick={onClick}
+      >
+        <primitive object={scene} />
+      </group>
+  
       {isSelected && (
-        <mesh position={ringProps.position} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[ringProps.radius * 0.9, ringProps.radius, 32]} />
+        <mesh ref={ringRef}>
+          <ringGeometry args={[radius * 0.9, radius, 32]} />
           <meshBasicMaterial
             color="yellow"
             side={THREE.DoubleSide}
@@ -199,7 +208,8 @@ function Model({
           />
         </mesh>
       )}
-    </group>
+
+    </>
   );
 }
 
@@ -216,8 +226,8 @@ export default function SceneCanvas({
 }) {
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <Canvas camera={{ position: [0, 2, 5], fov: 60 }}>
-        <ambientLight intensity={0.5} />
+      <Canvas camera={{ position: [0, 20, 10], fov: 15 }}>
+        <ambientLight intensity={0.6} />
         <directionalLight position={[2, 2, 2]} />
         <Suspense fallback={null}>
           {sceneData.map((item, index) => {
