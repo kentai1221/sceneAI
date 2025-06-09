@@ -15,7 +15,10 @@ export async function POST(req: NextRequest) {
     const endpoint = process.env.AZURE_OPENAI_ENDPOINT!;
     const deployment = process.env.AZURE_OPENAI_DEPLOYMENT!;
     const apiVersion = process.env.AZURE_OPENAI_API_VERSION!;
+    const OPENROUTER_apiKey = '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';
+    const OPENROUTER_model = "qwen/qwen2.5-vl-3b-instruct:free";
 
+    //Azure
     const response = await fetch(
       `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
       {
@@ -28,9 +31,31 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    //qwen
+    //  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${OPENROUTER_apiKey}`,
+    //   },
+    //   body: JSON.stringify({
+    //     model: OPENROUTER_model,
+    //     messages: imagePayload.messages,
+    //   }),
+    // });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return NextResponse.json(
+        { error: "OpenRouter API error", detail: errorText },
+        { status: response.status }
+      );
+    }
+
     const json = await response.json();
 
     const result = json?.choices?.[0]?.message?.content;
+    console.log("Response:", result);
     if (!result) {
       console.error("Azure returned empty content:", JSON.stringify(json, null, 2));
       return NextResponse.json({ error: "No content returned" }, { status: 500 });

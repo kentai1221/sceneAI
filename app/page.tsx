@@ -86,158 +86,136 @@ export default function Home() {
   }, []);
 
   const handleUpload = async () => {
-    if (fileList.length === 0) return;
-  
-    setAnalysisResponse("🧠 Reading images...");
-    
-    const base64Images = await Promise.all(
-      fileList.map(
-        (file) =>
-          new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64 = reader.result?.toString().split(",")[1] || "";
-              resolve(base64);
-            };
-            reader.readAsDataURL(file);
-          })
-      )
-    );
-  
-    try {
-      // Step 1: Generate floor
-      setAnalysisResponse("🧠 Generating floor...");
-  
-      const imageParts = base64Images.map((base64) => ({
-        type: "image_url",
-        image_url: { url: `data:image/jpeg;base64,${base64}` },
-      }));
-      const [actualWidth, actualHeight, actualDepth] = await getActualSizeFromGLB("/models/floor.glb");
+  if (fileList.length === 0) return;
 
-      const floorPrompt = {
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `You're generating a 3D layout for a 7-11 store.
+  setAnalysisResponse("🧠 Reading images...");
 
-                The original floor model has these real dimensions:
-                - Width: ${actualWidth.toFixed(2)} meters
-                - Depth: ${actualDepth.toFixed(2)} meters
+  const base64Images = await Promise.all(
+    fileList.map(
+      (file) =>
+        new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result?.toString().split(",")[1] || "";
+            resolve(base64);
+          };
+          reader.readAsDataURL(file);
+        })
+    )
+  );
 
-                Based on the store in the image, estimate the correct size **in meters** that the floor should be scaled to match:
-                - Desired Width: ?
-                - Desired Depth: ?
+  try {
+    // Step 1: Generate floor as a BOX instead of a model
+    setAnalysisResponse("🧠 Generating floor...");
 
-                Return only one object in this format:
-                {
-                  "type": "model",
-                  "path": "/models/floor.glb",
-                  "targetSize": [desiredWidthInMeters, desiredHeight, desiredDepthInMeters]
-                }
+    const imageParts = base64Images.map((base64) => ({
+      type: "image_url",
+      image_url: { url: `data:image/jpeg;base64,${base64}` },
+    }));
 
-                Note:
-                - Do not return a scale.
-                - Use meters.
-                - Height can be fixed (e.g. 0.1).
-                - Return JSON array only.`
-                  },
-                  ...imageParts,
-                ],
-              },
-            ],
-      };
-      
-  
-      const floorRes = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imagePayload: floorPrompt }),
-      });
-  
-      const floorData = await floorRes.json();
-      let floorText = floorData?.result || "";
-      floorText = floorText.replace(/```json|```/g, "").trim();
-      const floorJSON = JSON.parse(floorText);
+    const floorPrompt = {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You're generating a flat floor for a 7-11 store using a 3D box.
+              
+Based on the store layout shown in the image, estimate the dimensions of the store floor in meters:
 
-      const floor = Array.isArray(floorJSON) ? floorJSON[0] : floorJSON;
-      const targetSize = floor.targetSize;
-      const finalScale = [
-        targetSize[0] / actualWidth,
-        targetSize[1] / actualHeight,
-        targetSize[2] / actualDepth
-      ];
-      
-      const scaledFloor = {
-        type: "model",
-        path: "/models/floor.glb",
-        scale: finalScale
-      };
-      // Step 2: Generate walls
-      setAnalysisResponse("🧱 Generating walls...");
-      const [floorWidth, floorHeight, floorDepth] = scaledFloor.scale;
+Return only one object in this format:
+{
+  "type": "box",
+  "color": "lightgray",
+  "position": [0, 0, 0],
+  "scale": [widthInMeters, 0.1, depthInMeters]
+}
 
-      const wallPrompt = {
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `You're generating 4 surrounding walls for a 7-11 store floor.
-      
-      The floor object is:
-      ${JSON.stringify(scaledFloor, null, 2)}
-      
-      Rules for each wall:
-      - type: "box"
-      - color: "lightgray"
-      - height: 2.5 meters
-      - thickness: 0.2 meters
-      
-      Placement:
-      - Front/Back walls:
-        - scale: [${floorWidth}, 2.5, 0.2]
-        - position.z: ±(${floorDepth} / 2 + 0.1)
-        - position.y: 1.25 (half the wall height)
-      - Left/Right walls:
-        - scale: [0.2, 2.5, ${floorDepth}]
-        - position.x: ±(${floorWidth} / 2 + 0.1)
-        - position.y: 1.25
-      
-      Format:
-      - Use arrays only for scale and position (e.g. [x, y, z])
-      - Do NOT use object format
-      - Return a JSON array with 4 walls, no markdown, no comments.`
-              }
-            ]
-          }
-        ]
-      };
-      
-      const wallRes = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imagePayload: wallPrompt }),
-      });
-  
-      const wallData = await wallRes.json();
-      let wallText = wallData?.result || "";
-      wallText = wallText.replace(/```json|```/g, "").trim();
-      const walls = JSON.parse(wallText);
+- Height (Y-axis) should be fixed to 0.1 meters.
+- Return a single JSON object. No markdown, no comments.`,
+            },
+            ...imageParts,
+          ],
+        },
+      ],
+    };
 
-  
-      // Combine and show
-      setSceneData([scaledFloor, ...walls]);
-      console.log([scaledFloor, ...walls])
-      setAnalysisResponse("✅ Floor and walls loaded!");
-    } catch (err) {
-      console.error("Upload error:", err);
-      setAnalysisResponse("❌ Failed to load scene.");
-    }
-  };
+    const floorRes = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imagePayload: floorPrompt }),
+    });
+
+    const floorData = await floorRes.json();
+    let floorText = floorData?.result || "";
+    floorText = floorText.replace(/```json|```/g, "").trim();
+    const floor = JSON.parse(floorText);
+
+    // Step 2: Generate walls
+    setAnalysisResponse("🧱 Generating walls...");
+
+    const [floorWidth, , floorDepth] = floor.scale;
+
+    const wallPrompt = {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You're generating 4 surrounding walls for a 7-11 store floor.
+
+The floor object is:
+${JSON.stringify(floor, null, 2)}
+
+Rules for each wall:
+- type: "box"
+- color: "lightgray"
+- height: 2.5 meters
+- thickness: 0.2 meters
+
+Placement:
+- Front/Back walls:
+  - scale: [${floorWidth}, 2.5, 0.2]
+  - position.z: ±(${floorDepth} / 2 + 0.1)
+  - position.y: 1.25
+- Left/Right walls:
+  - scale: [0.2, 2.5, ${floorDepth}]
+  - position.x: ±(${floorWidth} / 2 + 0.1)
+  - position.y: 1.25
+
+Format:
+- Use arrays only for scale and position (e.g. [x, y, z])
+- Do NOT use object format
+- Return a JSON array with 4 walls, no markdown, no comments.`,
+            },
+          ],
+        },
+      ],
+    };
+
+    const wallRes = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imagePayload: wallPrompt }),
+    });
+
+    const wallData = await wallRes.json();
+    let wallText = wallData?.result || "";
+    wallText = wallText.replace(/```json|```/g, "").trim();
+    const walls = JSON.parse(wallText);
+
+    // Combine and show
+    setSceneData([floor, ...walls]);
+    console.log([floor, ...walls]);
+    setAnalysisResponse("✅ Floor and walls loaded!");
+  } catch (err) {
+    console.error("Upload error:", err);
+    setAnalysisResponse("❌ Failed to load scene.");
+  }
+};
+
   
 
   const handleSendMessage = async () => {
