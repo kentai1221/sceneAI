@@ -171,7 +171,7 @@ ${JSON.stringify(floor, null, 2)}
 
 Rules for each wall:
 - type: "box"
-- color: "lightgray"
+- color: "gray"
 - height: 2.5 meters
 - thickness: 0.2 meters
 
@@ -187,8 +187,15 @@ Placement:
 
 Format:
 - Use arrays only for scale and position (e.g. [x, y, z])
-- Do NOT use object format
-- Return a JSON array with 4 walls, no markdown, no comments.`,
+- Return a JSON array with 4 walls, no markdown, no comments.
+- Return the objects in this format:
+{
+  "type": "box",
+  "color": "gray",
+  "position": [x, y, z],
+  "scale": [x, y, z]
+}`,
+
             },
           ],
         },
