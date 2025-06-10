@@ -85,7 +85,7 @@ export default function Home() {
       .then((data) => setSceneData(data));
   }, []);
 
-  const handleUpload = async () => {
+ const handleUpload = async () => {
   if (fileList.length === 0) return;
 
   setAnalysisResponse("🧠 Reading images...");
@@ -105,35 +105,77 @@ export default function Home() {
   );
 
   try {
-    // Step 1: Generate floor as a BOX instead of a model
-    setAnalysisResponse("🧠 Generating floor...");
+    setAnalysisResponse("🧠 Analyzing scene (floor + walls)...");
 
     const imageParts = base64Images.map((base64) => ({
       type: "image_url",
       image_url: { url: `data:image/jpeg;base64,${base64}` },
     }));
 
-    const floorPrompt = {
+    const combinedPrompt = {
       messages: [
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: `You're generating a flat floor for a 7-11 store using a 3D box.
-              
-Based on the store layout shown in the image, estimate the dimensions of the store floor in meters:
+              text: `You are analyzing one or more images of a 7-Eleven store.
 
-Return only one object in this format:
-{
-  "type": "box",
-  "color": "lightgray",
-  "position": [0, 0, 0],
-  "scale": [widthInMeters, 0.1, depthInMeters]
-}
+Some images may be real-world photos of the store interior.
+Some may be layout sketches or top-down floorplans.
+Some may contain both types of information.
 
-- Height (Y-axis) should be fixed to 0.1 meters.
-- Return a single JSON object. No markdown, no comments.`,
+Instructions:
+- If a layout or sketch is available, use it to determine the structure and layout of the store (walls, floor area).
+- If only real photos are available, use them to estimate the store's approximate size and proportions.
+- If both are available, use the layout for structure and the photos for real-world scale.
+- Layout should be used to determine the floor area and wall positions if both types of images are present.
+
+Your task is to return a single JSON array with:
+- 1 floor object (type: "box", color: "lightgray")
+- 4 surrounding wall objects (type: "box", color: "gray")
+
+In the **first object** (the floor), include a field called "log" with the following format:
+- How many layout and photo images were used
+- The estimated floor size in meters
+- A list of all store objects you detected (around 10 furniture or equipment of the 7-Eleven store for reconstruct a 3D scene of 7-Eleven), with their approximate positions and rotations.
+
+Format example:
+"log": "n layout, n photos, Xm x Ym, objects: object_name_1 at [x,y,z], rotation: [x,y,z], object_name_2 at [x,y,z], rotation: [x,y,z]..."
+
+- Rotation must be in **degrees** and in [x, y, z] format.
+- Y-axis (up) rotation is most important for direction the object is facing.
+- Estimate realistic facing direction based on layout or photo.
+
+Step 1: Analyze the image to estimate the dimensions of the store floor (width x depth) in meters.
+
+Step 2: Generate the floor object:
+- type: "box"
+- color: "lightgray"
+- position: [0, 0, 0]
+- scale: [widthInMeters, 0.1, depthInMeters]
+- Add a "log" field with the analysis summary.
+
+Step 3: Generate 4 surrounding walls:
+- type: "box"
+- color: "gray"
+- height: 2.5 meters
+- thickness: 0.2 meters
+
+Wall placement:
+- Front/Back walls:
+  - scale: [widthInMeters, 2.5, 0.2]
+  - position: [0, 1.25, ±(depthInMeters / 2 + 0.1)]
+
+- Left/Right walls:
+  - scale: [0.2, 2.5, depthInMeters]
+  - position: [±(widthInMeters / 2 + 0.1), 1.25, 0]
+
+⚠️ Format Requirements:
+- Return a **JSON array** of 5 objects: 1 floor + 4 walls.
+- Each object must have: type, color, position, and scale.
+- Use only arrays for position and scale (e.g., [x, y, z])
+- No markdown, no extra text, only a pure JSON array.`,
             },
             ...imageParts,
           ],
@@ -141,87 +183,27 @@ Return only one object in this format:
       ],
     };
 
-    const floorRes = await fetch("/api/analyze", {
+    const response = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imagePayload: floorPrompt }),
+      body: JSON.stringify({ imagePayload: combinedPrompt }),
     });
 
-    const floorData = await floorRes.json();
-    let floorText = floorData?.result || "";
-    floorText = floorText.replace(/```json|```/g, "").trim();
-    const floor = JSON.parse(floorText);
+    const data = await response.json();
+    let resultText = data?.result || "";
+    resultText = resultText.replace(/```json|```/g, "").trim();
+    const sceneObjects = JSON.parse(resultText);
 
-    // Step 2: Generate walls
-    setAnalysisResponse("🧱 Generating walls...");
-
-    const [floorWidth, , floorDepth] = floor.scale;
-
-    const wallPrompt = {
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `You're generating 4 surrounding walls for a 7-11 store floor.
-
-The floor object is:
-${JSON.stringify(floor, null, 2)}
-
-Rules for each wall:
-- type: "box"
-- color: "gray"
-- height: 2.5 meters
-- thickness: 0.2 meters
-
-Placement:
-- Front/Back walls:
-  - scale: [${floorWidth}, 2.5, 0.2]
-  - position.z: ±(${floorDepth} / 2 + 0.1)
-  - position.y: 1.25
-- Left/Right walls:
-  - scale: [0.2, 2.5, ${floorDepth}]
-  - position.x: ±(${floorWidth} / 2 + 0.1)
-  - position.y: 1.25
-
-Format:
-- Use arrays only for scale and position (e.g. [x, y, z])
-- Return a JSON array with 4 walls, no markdown, no comments.
-- Return the objects in this format:
-{
-  "type": "box",
-  "color": "gray",
-  "position": [x, y, z],
-  "scale": [x, y, z]
-}`,
-
-            },
-          ],
-        },
-      ],
-    };
-
-    const wallRes = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imagePayload: wallPrompt }),
-    });
-
-    const wallData = await wallRes.json();
-    let wallText = wallData?.result || "";
-    wallText = wallText.replace(/```json|```/g, "").trim();
-    const walls = JSON.parse(wallText);
-
-    // Combine and show
-    setSceneData([floor, ...walls]);
-    console.log([floor, ...walls]);
+    // Update scene
+    setSceneData(sceneObjects);
+    console.log("✅ Floor and walls:", sceneObjects);
     setAnalysisResponse("✅ Floor and walls loaded!");
   } catch (err) {
     console.error("Upload error:", err);
-    setAnalysisResponse("❌ Failed to load scene.");
+    setAnalysisResponse("❌ Failed to analyze scene.");
   }
 };
+
 
   
 
