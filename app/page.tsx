@@ -126,56 +126,73 @@ Some may be layout sketches or top-down floorplans.
 Some may contain both types of information.
 
 Instructions:
-- If a layout or sketch is available, use it to determine the structure and layout of the store (walls, floor area).
-- If only real photos are available, use them to estimate the store's approximate size and proportions.
-- If both are available, use the layout for structure and the photos for real-world scale.
-- Layout should be used to determine the floor area and wall positions if both types of images are present.
 
-Your task is to return a single JSON array with:
-- 1 floor object (type: "box", color: "lightgray")
-- 4 surrounding wall objects (type: "box", color: "gray")
+If a layout or sketch is available, use it to determine the structure and layout of the store (walls, floor area).
 
-In the **first object** (the floor), include a field called "log" with the following format:
-- How many layout and photo images were used
-- The estimated floor size in meters
-- A list of all store objects you detected (around 10 furniture or equipment of the 7-Eleven store for reconstruct a 3D scene of 7-Eleven), with their approximate positions and rotations.
+If only real photos are available, use them to estimate the store's approximate size and proportions.
 
-Format example:
-"log": "n layout, n photos, Xm x Ym, objects: object_name_1 at [x,y,z], rotation: [x,y,z], object_name_2 at [x,y,z], rotation: [x,y,z]..."
+If both are available, use the layout for structure and the photos for real-world scale.
 
-- Rotation must be in **degrees** and in [x, y, z] format.
-- Y-axis (up) rotation is most important for direction the object is facing.
-- Estimate realistic facing direction based on layout or photo.
+Layout should be used to determine the floor area and wall positions if both types of images are present.
 
-Step 1: Analyze the image to estimate the dimensions of the store floor (width x depth) in meters.
+Your task is to return a single JSON array including:
 
-Step 2: Generate the floor object:
-- type: "box"
-- color: "lightgray"
-- position: [0, 0, 0]
-- scale: [widthInMeters, 0.1, depthInMeters]
-- Add a "log" field with the analysis summary.
+1 floor object (type: "box", color: "lightgray")
 
-Step 3: Generate 4 surrounding walls:
-- type: "box"
-- color: "gray"
-- height: 2.5 meters
-- thickness: 0.2 meters
+N wall objects (type: "box", color: "gray") based on what is visible in the layout or images
 
-Wall placement:
-- Front/Back walls:
-  - scale: [widthInMeters, 2.5, 0.2]
-  - position: [0, 1.25, ±(depthInMeters / 2 + 0.1)]
+Wall Generation Rules:
 
-- Left/Right walls:
-  - scale: [0.2, 2.5, depthInMeters]
-  - position: [±(widthInMeters / 2 + 0.1), 1.25, 0]
+The store layout should include 3 full walls (left, right, and back).
 
-⚠️ Format Requirements:
-- Return a **JSON array** of 5 objects: 1 floor + 4 walls.
-- Each object must have: type, color, position, and scale.
-- Use only arrays for position and scale (e.g., [x, y, z])
-- No markdown, no extra text, only a pure JSON array.`,
+The front side (customer-facing) must NOT have a full wall.
+
+Instead, do one of the following:
+
+Leave it fully open (no wall at all)
+
+OR add two short wall segments (e.g., 1 meter wide) on each side of the front opening
+
+This is typical of Hong Kong 7-Eleven stores: glass or shelf areas at the front
+
+DO NOT generate walls that are floating or disconnected from the floor
+
+All wall elements must connect precisely with the floor and align correctly with the layout
+
+Wall height: 2.5 meters
+
+Wall thickness: 0.2 meters
+
+You must compute the correct width/depth of each wall based on the floor and detected layout
+
+Floor Object Requirements:
+
+The first object in the array must be the floor
+
+type: "box"
+
+color: "lightgray"
+
+position: [0, 0, 0]
+
+scale: [width, 0.1, depth] (in meters)
+
+Include a log field in the floor object with the following format:
+log: "n layout, n photos, Xm x Ym, objects: object_name_1 at [x,y,z], rotation: [x,y,z], object_name_2 at [x,y,z], rotation: [x,y,z]..."
+
+Rotation Notes:
+
+Use degrees for rotations
+
+Focus on Y-axis (facing direction)
+
+Final Output Requirements:
+
+Return only a pure JSON array
+
+Format: 1 floor + N wall objects
+
+No markdown, no extra text`,
             },
             ...imageParts,
           ],

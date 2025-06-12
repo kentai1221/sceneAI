@@ -18,38 +18,45 @@ export async function POST(req: NextRequest) {
     const OPENROUTER_apiKey = process.env.QWEN_API_KEY!;
     const OPENROUTER_model = "qwen/qwen2.5-vl-72b-instruct:free";
 
+    const AI = process.env.AI_PROVIDER || "azure";
+    let response;
+
     //Azure
-    // const response = await fetch(
-    //   `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       "api-key": apiKey,
-    //     },
-    //     body: JSON.stringify(imagePayload),
-    //   }
-    // );
+    if (AI === "azure") {
+        response = await fetch(
+          `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "api-key": apiKey,
+            },
+            body: JSON.stringify(imagePayload),
+          }
+        );
+      }
+    else {
 
-    //qwen
-     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_apiKey}`,
-      },
-      body: JSON.stringify({
-        model: OPENROUTER_model,
-        messages: imagePayload.messages,
-      }),
-    });
+      //qwen
+      response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENROUTER_apiKey}`,
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_model,
+          messages: imagePayload.messages,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json(
-        { error: "OpenRouter API error", detail: errorText },
-        { status: response.status }
-      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        return NextResponse.json(
+          { error: "OpenRouter API error", detail: errorText },
+          { status: response.status }
+        );
+      }
     }
 
     const json = await response.json();

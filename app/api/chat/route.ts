@@ -11,22 +11,26 @@ export async function POST(req: NextRequest) {
   const OPENROUTER_apiKey = process.env.QWEN_API_KEY!;
   const OPENROUTER_model = "qwen/qwen2.5-vl-72b-instruct:free";
 
+  const AI = process.env.AI_PROVIDER || "azure";
+  let response;
   try {
     //Azure
-    // const response = await fetch(
-    //   `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       "api-key": apiKey,
-    //     },
-    //     body: JSON.stringify({messages}),
-    //   }
-    // );
+    if( AI === "azure") {
+    response = await fetch(
+      `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": apiKey,
+        },
+        body: JSON.stringify({messages}),
+      }
+    );
+  }else {
 
     //qwen
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,6 +46,7 @@ export async function POST(req: NextRequest) {
       const errorText = await response.text();
       return NextResponse.json({ error: "OpenRouter API Error", detail: errorText }, { status: response.status });
     }
+  }
 
     const json = await response.json();
     const reply = json?.choices?.[0]?.message?.content || "No response";
