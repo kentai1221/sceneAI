@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import SceneCanvas from "@/app/ui/SceneCanvas";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 
 function getModelSizeFromScene(scene: THREE.Object3D): [number, number, number] {
   const box = new THREE.Box3().setFromObject(scene);
@@ -69,6 +70,7 @@ type SceneItem = {
   rotation?: [number, number, number];
   scale?: [number, number, number];
   color?: string;
+  message?: string; // Added message property
 };
 
 export default function Home() {
@@ -78,6 +80,7 @@ export default function Home() {
   const [chatInput, setChatInput] = useState("");
   const [sceneData, setSceneData] = useState<SceneItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/scene.json")
@@ -85,9 +88,16 @@ export default function Home() {
       .then((data) => setSceneData(data));
   }, []);
 
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages]);
+
  const handleUpload = async () => {
   if (fileList.length === 0) return;
 
+  addChatMessage({ role: "assistant", content: "🧠 Analyzing your images...Please wait!" });
   setAnalysisResponse("🧠 Reading images...");
 
   const base64Images = await Promise.all(
@@ -211,18 +221,29 @@ No markdown, no extra text`,
     resultText = resultText.replace(/```json|```/g, "").trim();
     const sceneObjects = JSON.parse(resultText);
 
-    // Update scene
     setSceneData(sceneObjects);
-    console.log("✅ Floor and walls:", sceneObjects);
     setAnalysisResponse("✅ Floor and walls loaded!");
+    
+    const floor = sceneObjects.find((obj: SceneItem) => obj.type === "box" && obj.position?.[1] === 0);
+    if (floor?.message) {
+      addChatMessage({ role: "assistant", content: floor.message });
+    } else {
+      addChatMessage({ role: "assistant", content: "✅ Scene generated." });
+    }
+
   } catch (err) {
     console.error("Upload error:", err);
     setAnalysisResponse("❌ Failed to analyze scene.");
   }
 };
 
+  const addChatMessage = (msg: { role: string; content: string }) => {
+    setChatMessages((prev) => {
+      const updated = [...prev, msg];
+      return updated;
+    });
+  };
 
-  
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
@@ -230,15 +251,38 @@ No markdown, no extra text`,
     const updatedMessages = [...chatMessages, { role: "user", content: chatInput }];
     setChatMessages(updatedMessages);
     setChatInput("");
-
+    //console.log("Sending messages to AI:", updatedMessages);
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: updatedMessages }),
+      body: JSON.stringify({ messages: updatedMessages, sceneData, }),
     });
 
     const data = await res.json();
-    setChatMessages([...updatedMessages, { role: "assistant", content: data?.result || "No response" }]);
+    const assistantReply = data?.result || "No response";
+
+    let updatedScene: SceneItem[] | null = null;
+
+     try {
+    const parsed = JSON.parse(assistantReply);
+      if (Array.isArray(parsed)) {
+        updatedScene = parsed;
+        setSceneData(parsed); 
+
+        const floor = parsed.find((obj) => obj.type === "box" && obj.position?.[1] === 0);
+        if (floor?.message) {
+          addChatMessage({ role: "assistant", content: floor.message });
+        } else {
+          addChatMessage({ role: "assistant", content: "✅ Scene updated." });
+        }
+      } else {
+        // fallback if it's not a JSON array
+        addChatMessage({ role: "assistant", content: assistantReply });
+      }
+    } catch (e) {
+      // not JSON, just treat as a normal message
+      addChatMessage({ role: "assistant", content: assistantReply });
+    }
   };
 
   const handleSaveScene = async () => {
@@ -433,6 +477,7 @@ No markdown, no extra text`,
                 <p className="mt-1 whitespace-pre-wrap">{msg.content}</p>
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
           <div className="flex gap-2">
             <input

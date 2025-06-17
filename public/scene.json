@@ -1,67 +1,87 @@
 [
   {
-    "type": "model",
-    "path": "/models/floor.glb",
+    "type": "box",
+    "color": "lightgray",
+    "position": [
+      0,
+      0,
+      0
+    ],
     "scale": [
-      11.52,
+      10,
       0.1,
-      10
-    ]
+      8
+    ],
+    "log": "0 layout, 1 photos, 10m x 8m, objects: floor at [0,0,0], rotation: [0,0,0], wall_left at [-5,1.25,0], rotation: [0,0,0], wall_right at [5,1.25,0], rotation: [0,0,0], wall_back at [0,1.25,-4], rotation: [0,90,0], wall_front_left at [-4.5,1.25,4], rotation: [0,0,0], wall_front_right at [4.5,1.25,4], rotation: [0,0,0]"
   },
   {
     "type": "box",
-    "color": "lightgray",
-    "scale": [
-      11.48344373703003,
-      2.8708609342575073,
-      0.2296688747406006
-    ],
+    "color": "gray",
     "position": [
-      0,
-      0,
-      5.856556305885315
-    ]
-  },
-  {
-    "type": "box",
-    "color": "lightgray",
-    "scale": [
-      125.22600440760104,
-      17.39250061216681,
-      1.739250061216681
-    ],
-    "position": [
-      -6.5,
-      8.5,
-      -32.85655630588531
-    ]
-  },
-  {
-    "type": "box",
-    "color": "lightgray",
-    "scale": [
-      0.2296688747406006,
-      2.8708609342575073,
-      11.48344373703003
-    ],
-    "position": [
-      5.856556305885315,
-      0,
+      -5,
+      1.25,
       0
+    ],
+    "scale": [
+      0.2,
+      2.5,
+      8
     ]
   },
   {
     "type": "box",
-    "color": "lightgray",
-    "scale": [
-      0.2296688747406006,
-      2.8708609342575073,
-      11.48344373703003
-    ],
+    "color": "gray",
     "position": [
-      -5.856556305885315,
-      0,
+      5,
+      1.25,
       0
+    ],
+    "scale": [
+      0.2,
+      2.5,
+      8
+    ]
+  },
+  {
+    "type": "box",
+    "color": "gray",
+    "position": [
+      0,
+      1.25,
+      -4
+    ],
+    "scale": [
+      10,
+      2.5,
+      0.2
+    ]
+  },
+  {
+    "type": "box",
+    "color": "gray",
+    "position": [
+      -4.5,
+      1.25,
+      4
+    ],
+    "scale": [
+      1,
+      2.5,
+      0.2
+    ]
+  },
+  {
+    "type": "box",
+    "color": "gray",
+    "position": [
+      4.5,
+      1.25,
+      4
+    ],
+    "scale": [
+      1,
+      2.5,
+      0.2
     ]
   }
 ]
