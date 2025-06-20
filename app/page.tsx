@@ -71,6 +71,7 @@ type SceneItem = {
   scale?: [number, number, number];
   color?: string;
   message?: string; // Added message property
+  texturePath?: string;
 };
 
 export default function Home() {
@@ -244,18 +245,40 @@ No markdown, no extra text`,
     });
   };
 
+  function getCanvasImage(): string | null {
+    const canvas = document.querySelector("canvas");
+    if (!canvas) return null;
+    return canvas.toDataURL("image/jpeg", 0.9);
+  }
+
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
 
+    const canvasImage = getCanvasImage();
     const updatedMessages = [...chatMessages, { role: "user", content: chatInput }];
     setChatMessages(updatedMessages);
     setChatInput("");
     //console.log("Sending messages to AI:", updatedMessages);
+  
+    const payloadMessages = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: chatInput },
+          ...(canvasImage
+            ? [{ type: "image_url", image_url: { url: canvasImage } }]
+            : []),
+        ],
+      },
+    ];
+
+    console.log("Payload messages:", payloadMessages);
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: updatedMessages, sceneData, }),
+      body: JSON.stringify({ messages: payloadMessages, sceneData, }),
     });
 
     const data = await res.json();
@@ -269,7 +292,7 @@ No markdown, no extra text`,
         updatedScene = parsed;
         setSceneData(parsed); 
 
-        const floor = parsed.find((obj) => obj.type === "box" && obj.position?.[1] === 0);
+        const floor = parsed[0];
         if (floor?.message) {
           addChatMessage({ role: "assistant", content: floor.message });
         } else {

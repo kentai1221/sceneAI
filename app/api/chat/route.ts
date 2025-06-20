@@ -11,30 +11,41 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const sceneForAI = sceneData.map(({ message, ...rest }) => rest); // Remove `message` field
+
   // 🧠 Build system message with the current scene
   const systemMessage = {
     role: "system",
     content: `You are a 3D scene assistant.
-
-The current 3D scene is provided below as a JSON array.
-
-Your job is to modify this scene according to the user's request and return a **complete updated JSON array**.
-
-💡 Rules:
-- Always return only a JSON array (no explanation, no markdown)
-- Add your reply message in a \`message\` field inside the floor object (first object)
-- Do not change unchanged objects unless asked
-- Maintain correct formatting: type, position, rotation, scale, color
-
-- Never place objects outside the floor boundaries:
-  - X ∈ [-W/2, W/2]
-  - Z ∈ [-D/2, D/2]
-- Always set object Y-position = scale.y / 2 so it sits on the floor
-- Do not add multiple objects of the same type unless specifically asked
-
-📦 Current Scene:
-${JSON.stringify(sceneData, null, 2)}
-`,
+  
+  The current 3D scene is provided below as a JSON array.
+  
+  Your job is to modify this scene according to the user's request and return a **complete updated JSON array**.
+  
+  📷 If an image of the current 3D canvas is provided:
+  
+  - Treat it as a **live snapshot** of what the user currently sees on screen.
+  - Use it to visually **analyze whether any objects (like boxes or models) are misaligned, floating, missing, or placed incorrectly**.
+  - This helps verify that the scene JSON is working correctly — but the user may have zoomed, panned, or rotated the view, so **the image may not show the full scene**.
+  - Always treat the JSON scene data as the **authoritative source** for actual object positions and types.
+  - Use the image to identify **which parts of the scene need correction** based on what is visible.
+  
+  💡 Rules:
+  - Always return only a JSON array (no explanation, no markdown)
+  - The first object in the array must always be the floor box.
+  - Add your reply message inside this floor object in a \`message\` field.
+  - Do not change unchanged objects unless asked
+  - Maintain correct formatting: type, position, rotation, scale, color
+  
+  - Never place objects outside the floor boundaries:
+    - X ∈ [-W/2, W/2]
+    - Z ∈ [-D/2, D/2]
+  - Always set object Y-position = scale.y / 2 so it sits on the floor
+  - Do not add multiple objects of the same type unless specifically asked
+  
+  📦 Current Scene:
+  ${JSON.stringify(sceneForAI, null, 2)}
+  `
   };
 
   const fullMessages = [systemMessage, ...messages];

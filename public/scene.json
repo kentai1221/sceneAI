@@ -2,44 +2,45 @@
   {
     "type": "box",
     "color": "lightgray",
+    "texturePath": "/Tiles.png",
     "position": [
       0,
       0,
       0
     ],
     "scale": [
-      10,
+      6,
       0.1,
-      8
+      4
     ],
-    "log": "0 layout, 1 photos, 10m x 8m, objects: floor at [0,0,0], rotation: [0,0,0], wall_left at [-5,1.25,0], rotation: [0,0,0], wall_right at [5,1.25,0], rotation: [0,0,0], wall_back at [0,1.25,-4], rotation: [0,90,0], wall_front_left at [-4.5,1.25,4], rotation: [0,0,0], wall_front_right at [4.5,1.25,4], rotation: [0,0,0]"
+    "log": "0 layout, 1 photo, 6.0m x 4.0m, objects: left wall at [-3,1.25,0], rotation: [0,0,0], right wall at [3,1.25,0], rotation: [0,0,0], back wall at [0,1.25,-2], rotation: [0,0,0]"
   },
   {
     "type": "box",
     "color": "gray",
     "position": [
-      -5,
+      -3.1,
       1.25,
       0
     ],
     "scale": [
       0.2,
       2.5,
-      8
+      4
     ]
   },
   {
     "type": "box",
     "color": "gray",
     "position": [
-      5,
+      3.1,
       1.25,
       0
     ],
     "scale": [
       0.2,
       2.5,
-      8
+      4
     ]
   },
   {
@@ -48,38 +49,10 @@
     "position": [
       0,
       1.25,
-      -4
+      -2.1
     ],
     "scale": [
-      10,
-      2.5,
-      0.2
-    ]
-  },
-  {
-    "type": "box",
-    "color": "gray",
-    "position": [
-      -4.5,
-      1.25,
-      4
-    ],
-    "scale": [
-      1,
-      2.5,
-      0.2
-    ]
-  },
-  {
-    "type": "box",
-    "color": "gray",
-    "position": [
-      4.5,
-      1.25,
-      4
-    ],
-    "scale": [
-      1,
+      6,
       2.5,
       0.2
     ]

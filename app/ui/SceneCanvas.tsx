@@ -1,34 +1,38 @@
 "use client";
 import { useMemo, useRef, useEffect, useState } from 'react';
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Suspense } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
-import { useFBX } from "@/app/hooks/useFBX";
-import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
+import { SelectionArrow } from './SelectionArrow';
+import { useFBX } from "@/app/hooks/useFBX";
 
 type SceneItem = {
   type: "box" | "model";
-  path?: string; // for models
+  path?: string;
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: [number, number, number];
-  color?: string; // for boxes
+  color?: string;
+  texturePath?: string;
 };
 
-// 🔶 Selection Ring Component
-function SelectionRing({ radius = 1 }: { radius?: number }) {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-      <ringGeometry args={[radius * 0.9, radius, 32]} />
-      <meshBasicMaterial color="yellow" side={THREE.DoubleSide} transparent opacity={0.6} />
-    </mesh>
-  );
+function applyMaterialWithTexture(scene: THREE.Object3D, material: THREE.Material) {
+  scene.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) {
+      const mesh = child as THREE.Mesh;
+      if (!(mesh.geometry as THREE.BufferGeometry).attributes.uv) {
+        console.warn("Missing UVs on mesh:", child.name);
+      }
+      mesh.material = material;
+      mesh.material.needsUpdate = true;
+    }
+  });
 }
 
-// 🔷 Box Component
+
+// 🔶 Box Component
 function Box({
   position = [0, 0, 0],
   rotation = [0, 0, 0],
@@ -36,36 +40,71 @@ function Box({
   color = "gray",
   onClick,
   isSelected,
+  texturePath,
 }: Partial<SceneItem> & { onClick?: () => void; isSelected?: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  const [radius, setRadius] = useState(1);
+  const isFloor = color === "lightgray";
+  const texture = texturePath ? useLoader(TextureLoader, texturePath) : null;
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (groupRef.current) {
-      const box = new THREE.Box3().setFromObject(groupRef.current);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      setRadius(Math.max(size.x, size.z) / 2);
+    if (texture) {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+  
+      const tileSize = 1; // world units per tile
+      const repeatX = scale[0] / tileSize;
+      const repeatZ = scale[2] / tileSize;
+  
+      const applyRepeat = () => {
+        texture.repeat.set(repeatX, repeatZ);
+        texture.needsUpdate = true;
+      };
+  
+      if (texture.image) {
+        applyRepeat();
+      } else {
+        const interval = setInterval(() => {
+          if (texture.image) {
+            applyRepeat();
+            clearInterval(interval);
+          }
+        }, 50);
+      }
     }
-  }, [scale]);
+  }, [texture, scale]);
 
-  // 🔁 Update ring position every frame
-  useFrame(() => {
-    if (isSelected && groupRef.current && ringRef.current) {
-      const box = new THREE.Box3().setFromObject(groupRef.current);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      const ringY = box.min.y + 0.01;
+  if (isFloor) {
+    return (
+      <>
+        <group
+          ref={groupRef}
+          position={[position[0], 0.05, position[2]]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          onClick={onClick}
+        >
+          <mesh>
+            <planeGeometry args={[scale[0], scale[2]]} />
+            <meshStandardMaterial
+              map={texture || undefined}
+              color={texture ? undefined : color}
+              polygonOffset
+              polygonOffsetFactor={-2}
+              polygonOffsetUnits={-2}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
+        {isSelected && groupRef.current && (
+          <SelectionArrow targetRef={groupRef as React.RefObject<THREE.Group>} />
+        )}
+      </>
+    );
+  }
 
-      ringRef.current.position.set(center.x, ringY, center.z);
-      ringRef.current.rotation.set(-Math.PI / 2, 0, 0);
-    }
-  });
-
+  // fallback box
   return (
     <>
-      {/* The object */}
       <group
         ref={groupRef}
         position={position}
@@ -75,39 +114,18 @@ function Box({
       >
         <mesh>
           <boxGeometry />
-          <meshStandardMaterial color={color} />
+          <meshStandardMaterial
+            map={texture || undefined}
+            color={texture ? undefined : color}
+          />
         </mesh>
       </group>
 
-      {/* The ring rendered separately, in world space */}
-      {isSelected && (
-        <mesh ref={ringRef}>
-          <ringGeometry args={[radius * 0.9, radius, 32]} />
-          <meshBasicMaterial
-            color="yellow"
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
+      {isSelected && groupRef.current && (
+        <SelectionArrow targetRef={groupRef as React.RefObject<THREE.Group>} />
       )}
     </>
   );
-}
-
-function applyMaterialWithTexture(scene: THREE.Object3D, defaultMaterial: THREE.Material) {
-  scene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      const geometry = (child as THREE.Mesh).geometry as THREE.BufferGeometry;
-      if (!geometry.attributes.uv) {
-        console.warn("Missing UVs on mesh:", child.name);
-      }
-      const mesh = child as THREE.Mesh;
-      // 🔁 Forcefully apply the new material regardless
-      mesh.material = defaultMaterial;
-      mesh.material.needsUpdate = true;
-    }
-  });
 }
 
 // 🔷 Model Component
@@ -128,61 +146,28 @@ function Model({
   onClick?: () => void;
   isSelected?: boolean;
   color?: string;
-  texturePath?: string; // NEW: texture image path
+  texturePath?: string;
 }) {
   const extension = useMemo(() => path?.split('.').pop()?.toLowerCase(), [path]);
-
   const fbxScene = extension === 'fbx' && path ? useFBX(path) : null;
   const gltf = extension === 'glb' || extension === 'gltf' ? useGLTF(path || '') : null;
   const scene = fbxScene || gltf?.scene;
 
-  // Load texture if provided
   const texture = texturePath ? useLoader(TextureLoader, texturePath) : null;
-  const defaultMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color,
-      map: texture || undefined,
-      metalness: 0.3,
-      roughness: 0.8,
-    });
-  }, [color, texture]);
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    color,
+    map: texture || undefined,
+    metalness: 0.3,
+    roughness: 0.8,
+  }), [color, texture]);
 
   useEffect(() => {
     if (fbxScene) {
-      applyMaterialWithTexture(fbxScene, defaultMaterial);
+      applyMaterialWithTexture(fbxScene, material);
     }
-  }, [fbxScene, defaultMaterial]);
+  }, [fbxScene, material]);
 
   const groupRef = useRef<THREE.Group>(null);
-  const [ringProps, setRingProps] = useState<{
-    radius: number;
-    position: [number, number, number];
-  }>({ radius: 1, position: [0, 0, 0] });
-
-  const ringRef = useRef<THREE.Mesh>(null);
-  const [radius, setRadius] = useState(1);
-
-  useEffect(() => {
-    if (groupRef.current) {
-      const box = new THREE.Box3().setFromObject(groupRef.current);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      setRadius(Math.max(size.x, size.z) / 2);
-    }
-  }, [scene]);
-
-  useFrame(() => {
-    if (isSelected && groupRef.current && ringRef.current) {
-      const box = new THREE.Box3().setFromObject(groupRef.current);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      const ringY = box.min.y + 0.01;
-
-      ringRef.current.position.set(center.x, ringY, center.z);
-      ringRef.current.rotation.set(-Math.PI / 2, 0, 0);
-    }
-  });
-
   if (!scene) return null;
 
   return (
@@ -196,23 +181,12 @@ function Model({
       >
         <primitive object={scene} />
       </group>
-  
-      {isSelected && (
-        <mesh ref={ringRef}>
-          <ringGeometry args={[radius * 0.9, radius, 32]} />
-          <meshBasicMaterial
-            color="yellow"
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
+      {isSelected && groupRef.current && (
+        <SelectionArrow targetRef={groupRef as React.RefObject<THREE.Group>} />
       )}
-
     </>
   );
 }
-
 
 // 🎮 Main SceneCanvas Component
 export default function SceneCanvas({
@@ -244,6 +218,7 @@ export default function SceneCanvas({
                   scale={item.scale}
                   onClick={handleClick}
                   isSelected={isSelected}
+                  texturePath={item.texturePath}
                 />
               );
             } else if (item.type === "model") {
@@ -256,6 +231,7 @@ export default function SceneCanvas({
                   scale={item.scale}
                   onClick={handleClick}
                   isSelected={isSelected}
+                  texturePath={item.texturePath}
                 />
               );
             }
