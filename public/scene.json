@@ -1,60 +1,123 @@
 [
   {
     "type": "box",
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      8,
+      0.1,
+      6
+    ],
     "color": "lightgray",
     "texturePath": "/Tiles.png",
-    "position": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      6,
-      0.1,
-      4
-    ],
-    "log": "0 layout, 1 photo, 6.0m x 4.0m, objects: left wall at [-3,1.25,0], rotation: [0,0,0], right wall at [3,1.25,0], rotation: [0,0,0], back wall at [0,1.25,-2], rotation: [0,0,0]"
+    "message": "Shelving units were visually floating and have been adjusted to sit on the floor."
   },
   {
     "type": "box",
-    "color": "gray",
-    "position": [
-      -3.1,
-      1.25,
-      0
-    ],
-    "scale": [
-      0.2,
-      2.5,
-      4
-    ]
-  },
-  {
-    "type": "box",
-    "color": "gray",
-    "position": [
-      3.1,
-      1.25,
-      0
-    ],
-    "scale": [
-      0.2,
-      2.5,
-      4
-    ]
-  },
-  {
-    "type": "box",
-    "color": "gray",
     "position": [
       0,
       1.25,
-      -2.1
+      -3
     ],
     "scale": [
-      6,
+      8,
       2.5,
       0.2
-    ]
+    ],
+    "color": "white",
+    "material": "reflective"
+  },
+  {
+    "type": "box",
+    "position": [
+      -4,
+      1.25,
+      0
+    ],
+    "scale": [
+      0.2,
+      2.5,
+      6
+    ],
+    "color": "white",
+    "material": "reflective"
+  },
+  {
+    "type": "box",
+    "position": [
+      4,
+      1.25,
+      0
+    ],
+    "scale": [
+      0.2,
+      2.5,
+      6
+    ],
+    "color": "white",
+    "material": "reflective"
+  },
+  {
+    "type": "model",
+    "path": "/models/shelving.glb",
+    "position": [
+      0,
+      -7.629394360719743e-8,
+      -1.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "color": null
+  },
+  {
+    "type": "model",
+    "path": "/models/shelving.glb",
+    "position": [
+      0,
+      -7.629394360719743e-8,
+      0.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "color": null
+  },
+  {
+    "type": "model",
+    "path": "/models/shelving.glb",
+    "position": [
+      2.5,
+      -7.629394360719743e-8,
+      -2.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "color": null
   }
 ]

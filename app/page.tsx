@@ -130,80 +130,155 @@ export default function Home() {
           content: [
             {
               type: "text",
-              text: `You are analyzing one or more images of a 7-Eleven store.
+              text: `You are analyzing one or more images of a 7-Eleven store interior.
 
-Some images may be real-world photos of the store interior.
-Some may be layout sketches or top-down floorplans.
-Some may contain both types of information.
+              These images may include:
+              - Real-world photos of the store (showing shelves, walls, ceiling, entrances)
+              - Layout sketches or top-down floorplans
+              - Photos that include partial structure or open entrances
+              
+              Your job is to reconstruct the basic structure of the store as a 3D scene in JSON format.
+              
+              ---
+              
+              🎯 TASK:
+              
+              Return a **pure JSON array** of 3D objects with the following format:
+              
+              1. A single floor object:
+                - type: "box"
+                - position: [0, 0, 0]
+                - scale: [width, 0.1, depth] (in meters)
+                - color: "lightgray"
+                - log: "...summary of what you detected..."
+              
+              2. One or more wall objects:
+                - type: "box"
+                - position: [x, y, z]
+                - scale: [x, y, z]
+                - rotation: [x, y, z]
+                - color: "white"
+                - material (optional): "reflective"
+              
+              ---
+              
+              🎨 MATERIAL RULES:
+              
+              - **Walls must be white and reflective**.
+                - Use "color": "white" for all wall objects.
+                - Optionally add "material": "reflective" to indicate a glossy, light-reflecting surface.
+                - Example:
+                  {
+                    "type": "box",
+                    "position": [-5, 1.25, 0],
+                    "scale": [0.2, 2.5, 8],
+                    "color": "white",
+                    "material": "reflective"
+                  }
+              
+              - **Floor should not be reflective**.
+                - Use "color": "lightgray" and no "material" field for the floor.
+              
+              ---
 
-Instructions:
+              🧱 FLOOR MATERIAL:
 
-If a layout or sketch is available, use it to determine the structure and layout of the store (walls, floor area).
+              - The floor should simulate tiled indoor flooring.
+              - Always set: "texturePath": "/Tiles.png" on the floor object.
+              - The floor color should still be "lightgray" as a fallback.
+              - This texture will be tiled across the floor to simulate real tiles.
 
-If only real photos are available, use them to estimate the store's approximate size and proportions.
+              Example floor object:
+              {
+                "type": "box",
+                "position": [0, 0, 0],
+                "scale": [10, 0.1, 8],
+                "color": "lightgray",
+                "texturePath": "/Tiles.png",
+                "log": "..."
+              }
 
-If both are available, use the layout for structure and the photos for real-world scale.
+              ---
+              
+              📐 GEOMETRY RULES:
+              
+              - Floor must always be centered at [0, 0, 0]
+              - Wall height: typically 2.5 meters
+              - Wall thickness: ~0.2 meters
+              - Position each wall so that it sits perfectly on the floor:
+                - Y = scale.y / 2
+              - Do not create floating, overlapping, or misaligned geometry
+              - Units are in meters
+              
+              ---
+              
+              🧠 INTELLIGENT STRUCTURE DETECTION:
+              
+              From the images, determine:
+              - Estimated size of the store
+              - Where structural walls are located
+              - Whether the front is open, glass, door, etc.
+              
+              Do **not** hardcode any assumptions (like "always 3 walls").
+              Use visual reasoning and layout clues to decide how many walls and where they should be.
+              
+              ---
 
-Layout should be used to determine the floor area and wall positions if both types of images are present.
+              🧰 COMMON STORE OBJECTS:
 
-Your task is to return a single JSON array including:
+             It must have a shelving, if you can not detect the position, just estimate the position and rotation, add model objects using:
 
-1 floor object (type: "box", color: "lightgray")
+              {
+                "type": "model",
+                "path": "/models/shelving.glb",
+                "position": [x, y, z],
+                "rotation": [0, Y-degrees, 0],
+                "scale": [1, 1, 1]
+              }
 
-N wall objects (type: "box", color: "gray") based on what is visible in the layout or images
+              - Place shelves along walls or between aisles
+              - Ensure shelves are placed on the floor: Y-position = height / 2
+              - Use rotation Y-axis to face correct direction
 
-Wall Generation Rules:
+              ---
+              
+              📄 OUTPUT FORMAT:
+              
+              - Return **only a JSON array** (no markdown, no extra text)
+              - Must include:
+                - 1 floor object (first)
+                - N wall objects
+              - All objects: must have type, position, scale, color
+              - Wall objects: should also include "material": "reflective"
+              
+              Example:
+              [
+                {
+                  "type": "box",
+                  "position": [0, 0, 0],
+                  "scale": [10, 0.1, 8],
+                  "color": "lightgray",
+                  "log": "2 images analyzed. Estimated floor: 10m x 8m. Glass entrance at front. Walls on left, right, back."
+                },
+                {
+                  "type": "box",
+                  "position": [-5, 1.25, 0],
+                  "scale": [0.2, 2.5, 8],
+                  "color": "white",
+                  "material": "reflective"
+                }
+              ]
+---
 
-The store layout should include 3 full walls (left, right, and back).
+🎨 NOTES:
 
-The front side (customer-facing) must NOT have a full wall.
+- Use visual clues like corners, shadows, shelving alignment, and doors
+- You may use estimation if layout is missing
+- Avoid floating walls or disconnected elements
 
-Instead, do one of the following:
+---
 
-Leave it fully open (no wall at all)
-
-OR add two short wall segments (e.g., 1 meter wide) on each side of the front opening
-
-This is typical of Hong Kong 7-Eleven stores: glass or shelf areas at the front
-
-DO NOT generate walls that are floating or disconnected from the floor
-
-All wall elements must connect precisely with the floor and align correctly with the layout
-
-Wall height: 2.5 meters
-
-Wall thickness: 0.2 meters
-
-You must compute the correct width/depth of each wall based on the floor and detected layout
-
-Floor Object Requirements:
-
-The first object in the array must be the floor
-
-type: "box"
-
-color: "lightgray"
-
-position: [0, 0, 0]
-
-scale: [width, 0.1, depth] (in meters)
-
-Include a log field in the floor object with the following format:
-log: "n layout, n photos, Xm x Ym, objects: object_name_1 at [x,y,z], rotation: [x,y,z], object_name_2 at [x,y,z], rotation: [x,y,z]..."
-
-Rotation Notes:
-
-Use degrees for rotations
-
-Focus on Y-axis (facing direction)
-
-Final Output Requirements:
-
-Return only a pure JSON array
-
-Format: 1 floor + N wall objects
-
-No markdown, no extra text`,
+Respond with a pure JSON array. No extra text or markdown.`,
             },
             ...imageParts,
           ],
@@ -251,6 +326,42 @@ No markdown, no extra text`,
     return canvas.toDataURL("image/jpeg", 0.9);
   }
 
+  async function fixFloatingModels(sceneData: SceneItem[]): Promise<SceneItem[]> {
+    const loader = new GLTFLoader();
+  
+    return await Promise.all(
+      sceneData.map(async (obj:any) => {
+        if (obj.type === "model" && obj.path && obj.position) {
+          return new Promise<SceneItem>((resolve) => {
+            loader.load(obj.path, (gltf) => {
+              const temp = gltf.scene.clone();
+  
+              // Apply scale, rotation, position to match what will be rendered
+              if (obj.scale) temp.scale.set(...(obj.scale as [number, number, number]));
+              if (obj.rotation) temp.rotation.set(...(obj.rotation.map(THREE.MathUtils.degToRad) as [number, number, number]));
+              if (obj.position) temp.position.set(...(obj.position as [number, number, number]));
+  
+              const box = new THREE.Box3().setFromObject(temp);
+              const minY = box.min.y;
+  
+              const corrected = {
+                ...obj,
+                position: [...obj.position],
+              };
+  
+              // Shift downward if floating
+              if (minY > 0.01) {
+                corrected.position[1] -= minY;
+              }
+  
+              resolve(corrected);
+            });
+          });
+        }
+        return obj;
+      })
+    );
+  }
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
@@ -290,9 +401,12 @@ No markdown, no extra text`,
     const parsed = JSON.parse(assistantReply);
       if (Array.isArray(parsed)) {
         updatedScene = parsed;
-        setSceneData(parsed); 
 
-        const floor = parsed[0];
+        const corrected = await fixFloatingModels(parsed);
+
+        setSceneData(corrected); 
+
+        const floor = corrected[0];
         if (floor?.message) {
           addChatMessage({ role: "assistant", content: floor.message });
         } else {

@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { TextureLoader } from 'three';
 import { SelectionArrow } from './SelectionArrow';
 import { useFBX } from "@/app/hooks/useFBX";
+import { Environment } from "@react-three/drei";
 
 type SceneItem = {
   type: "box" | "model";
@@ -16,6 +17,7 @@ type SceneItem = {
   scale?: [number, number, number];
   color?: string;
   texturePath?: string;
+  material?: "reflective";
 };
 
 function applyMaterialWithTexture(scene: THREE.Object3D, material: THREE.Material) {
@@ -41,6 +43,7 @@ function Box({
   onClick,
   isSelected,
   texturePath,
+  material,
 }: Partial<SceneItem> & { onClick?: () => void; isSelected?: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
   const isFloor = color === "lightgray";
@@ -81,6 +84,7 @@ function Box({
           ref={groupRef}
           position={[position[0], 0.05, position[2]]}
           rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow
           onClick={onClick}
         >
           <mesh>
@@ -112,12 +116,24 @@ function Box({
         scale={scale}
         onClick={onClick}
       >
-        <mesh>
+        <mesh castShadow receiveShadow>
           <boxGeometry />
-          <meshStandardMaterial
-            map={texture || undefined}
-            color={texture ? undefined : color}
-          />
+          {material === "reflective" ? (
+            <meshPhysicalMaterial
+              color={texture ? undefined : color}
+              map={texture || undefined}
+              metalness={0.1}
+              roughness={0.1}
+              reflectivity={0.7}
+              clearcoat={0.5}
+              clearcoatRoughness={0.1}
+            />
+          ) : (
+            <meshStandardMaterial
+              map={texture || undefined}
+              color={texture ? undefined : color}
+            />
+          )}
         </mesh>
       </group>
 
@@ -167,6 +183,17 @@ function Model({
     }
   }, [fbxScene, material]);
 
+  useEffect(() => {
+    if (scene && groupRef.current) {
+      const box = new THREE.Box3().setFromObject(scene);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Offset all axes so model is centered and sits on floor
+      scene.position.set(-center.x, -center.y, -center.z);
+    }
+  }, [scene]);
+
   const groupRef = useRef<THREE.Group>(null);
   if (!scene) return null;
 
@@ -178,6 +205,8 @@ function Model({
         rotation={rotation}
         scale={scale}
         onClick={onClick}
+        castShadow
+        receiveShadow
       >
         <primitive object={scene} />
       </group>
@@ -200,9 +229,20 @@ export default function SceneCanvas({
 }) {
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <Canvas camera={{ position: [0, 20, 10], fov: 15 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[2, 2, 2]} />
+      <Canvas shadows camera={{ position: [0, 20, 10], fov: 15 }}>
+        <ambientLight intensity={0.4} />
+        <directionalLight
+          castShadow
+          position={[5, 10, 5]}
+          intensity={1}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-far={50}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
+        />
         <Suspense fallback={null}>
           {sceneData.map((item, index) => {
             const isSelected = selectedIndex === index;
@@ -237,6 +277,7 @@ export default function SceneCanvas({
             }
             return null;
           })}
+          <Environment preset="city" />
         </Suspense>
         <OrbitControls />
       </Canvas>
