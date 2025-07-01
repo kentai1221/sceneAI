@@ -183,32 +183,57 @@ function Model({
     }
   }, [fbxScene, material]);
 
-  useEffect(() => {
-    if (scene && groupRef.current) {
-      const box = new THREE.Box3().setFromObject(scene);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
+  // useEffect(() => {
+  //   if (scene && groupRef.current) {
+  //     const box = new THREE.Box3().setFromObject(scene);
+  //     const center = new THREE.Vector3();
+  //     box.getCenter(center);
 
-      // Offset all axes so model is centered and sits on floor
-      scene.position.set(-center.x, -center.y, -center.z);
-    }
-  }, [scene]);
+  //     // Offset all axes so model is centered and sits on floor
+  //     scene.position.set(-center.x, -center.y, -center.z);
+  //   }
+  // }, [scene]);
 
   const groupRef = useRef<THREE.Group>(null);
   if (!scene) return null;
+
+  const [centerOffset, setCenterOffset] = useState<[number, number, number]>([0, 0, 0]);
+
+  useEffect(() => {
+    if (scene) {
+      const box = new THREE.Box3().setFromObject(scene);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+  
+      const minY = box.min.y; // Ground level of the model
+  
+      // Set offset so that:
+      // - X and Z are centered (like a pivot)
+      // - Y is grounded (not centered)
+      setCenterOffset([-center.x, -minY, -center.z]);
+    }
+  }, [scene]);
+
+  const toRadians = (deg: number) => (deg * Math.PI) / 180;
+
+  const radiansRotation: [number, number, number] = rotation
+    ? (rotation.map(toRadians) as [number, number, number])
+    : [0, 0, 0];
 
   return (
     <>
       <group
         ref={groupRef}
         position={position}
-        rotation={rotation}
+        rotation={radiansRotation}
         scale={scale}
         onClick={onClick}
         castShadow
         receiveShadow
       >
-        <primitive object={scene} />
+        <group position={centerOffset}>
+          <primitive object={scene.clone()} />
+        </group>
       </group>
       {isSelected && groupRef.current && (
         <SelectionArrow targetRef={groupRef as React.RefObject<THREE.Group>} />

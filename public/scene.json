@@ -64,49 +64,9 @@
     "type": "model",
     "path": "/models/shelving.glb",
     "position": [
+      -2,
       0,
-      -7.629394360719743e-8,
-      -1.5
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
       1
-    ],
-    "color": null
-  },
-  {
-    "type": "model",
-    "path": "/models/shelving.glb",
-    "position": [
-      0,
-      -7.629394360719743e-8,
-      0.5
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ],
-    "color": null
-  },
-  {
-    "type": "model",
-    "path": "/models/shelving.glb",
-    "position": [
-      2.5,
-      -7.629394360719743e-8,
-      -2.5
     ],
     "rotation": [
       0,

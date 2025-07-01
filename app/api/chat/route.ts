@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fixSceneObjects } from "@/app/lib/fixSceneObjects";
 
 export async function POST(req: NextRequest) {
   const { messages, sceneData } = await req.json();
@@ -82,12 +83,28 @@ SHELF ROTATION ENFORCEMENT:
 
 ---
 
-🧊 FRIDGES / FREEZERS / DISPLAYS:
+📦 AVAILABLE 3D MODELS:
 
-- Must be placed along walls or in designated zones
-- Must be accessible (not blocked or inside other objects)
-- Should face outwards
-- Never float or rotate randomly
+Use these .glb files to build the scene:
+
+- "/models/atm.glb" → ATM
+- "/models/box.glb" → Boxes (sit on floor)
+- "/models/cashier.glb" → Cashier table
+- "/models/cctv.glb" → Security camera (attach to wall near ceiling)
+- "/models/chips.glb" / "chips2.glb" → Snacks (place on shelves)
+- "/models/freezer.glb" → For ice cream
+- "/models/fridge.glb" → For drinks
+- "/models/juice.glb" → Place on shelves
+- "/models/milk.glb" → Place on shelves
+- "/models/pos.glb" → POS machine (goes **on top of cashier.glb**)
+- "/models/poster1.glb" / "poster2.glb" → Attach to wall
+- "/models/shelves.glb" → Use for placing small products
+
+🧠 PLACEMENT RULES:
+- "pos.glb" must sit on "cashier.glb"
+- "chips.glb", "juice.glb", "milk.glb" must sit on "shelves.glb"
+- "cctv.glb", "poster1.glb", "poster2.glb" should be attached to wall at Y ≈ 2.4
+- Only use rotations Y = 0°, 90°, 180°, 270°
 
 ---
 
@@ -171,9 +188,22 @@ For every model in the scene:
     }
 
     const json = await response.json();
-    const reply = json?.choices?.[0]?.message?.content || "No response";
-    console.log("Response:", reply);
-    return NextResponse.json({ result: reply });
+    const rawReply = json?.choices?.[0]?.message?.content || "No response";
+    console.log("Response:", rawReply);
+    let fixedScene = null;
+
+    try {
+      const parsed = JSON.parse(rawReply);
+      if (Array.isArray(parsed)) {
+        fixedScene = fixSceneObjects(parsed);
+      }
+    } catch (e) {
+      console.error("Failed to parse AI JSON:", e);
+    }
+
+    return NextResponse.json({
+      result: fixedScene ?? rawReply,
+    });
   } catch (err) {
     return NextResponse.json(
       { error: "Failed to call AI", detail: String(err) },

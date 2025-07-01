@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fixSceneObjects } from "@/app/lib/fixSceneObjects";
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,7 +69,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No content returned" }, { status: 500 });
     }
 
-    return NextResponse.json({ result });
+    let fixedScene = null;
+
+    try {
+      const parsed = JSON.parse(result);
+      if (Array.isArray(parsed)) {
+        fixedScene = fixSceneObjects(parsed);
+      }
+    } catch (err) {
+      console.error("Failed to parse or fix AI result:", err);
+    }
+
+    return NextResponse.json({
+      result: fixedScene ?? result,
+    });
+
   } catch (err) {
     console.error("Azure OpenAI error:", err);
     return NextResponse.json(

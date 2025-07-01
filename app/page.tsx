@@ -3,6 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import SceneCanvas from "@/app/ui/SceneCanvas";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import SketchCanvas, { SketchCanvasRef } from "@/app/ui/SketchCanvas";
 
 
 function getModelSizeFromScene(scene: THREE.Object3D): [number, number, number] {
@@ -82,6 +83,8 @@ export default function Home() {
   const [sceneData, setSceneData] = useState<SceneItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [showSketchModal, setShowSketchModal] = useState(false);
+  const sketchCanvasRef = useRef<SketchCanvasRef>(null);
 
   useEffect(() => {
     fetch("/scene.json")
@@ -95,25 +98,35 @@ export default function Home() {
     }
   }, [chatMessages]);
 
- const handleUpload = async () => {
-  if (fileList.length === 0) return;
+ const handleUpload = async (sketchBase64?: string) => {
+  if (!sketchBase64 && fileList.length === 0) return;
 
   addChatMessage({ role: "assistant", content: "🧠 Analyzing your images...Please wait!" });
   setAnalysisResponse("🧠 Reading images...");
 
-  const base64Images = await Promise.all(
-    fileList.map(
-      (file) =>
-        new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64 = reader.result?.toString().split(",")[1] || "";
-            resolve(base64);
-          };
-          reader.readAsDataURL(file);
-        })
-    )
-  );
+  let base64Images: string[] = [];
+
+  if (typeof sketchBase64 === "string") {
+    // From SketchCanvas
+    const splitBase64 = sketchBase64.split(",")[1]; // removes the "data:image/jpeg;base64,"
+    base64Images = [splitBase64];
+  } else {
+    // From uploaded file list
+    base64Images = await Promise.all(
+      fileList.map(
+        (file) =>
+          new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result?.toString().split(",")[1] || "";
+              resolve(base64);
+            };
+            reader.readAsDataURL(file);
+          })
+      )
+    );
+  }
+
 
   try {
     setAnalysisResponse("🧠 Analyzing scene (floor + walls)...");
@@ -241,6 +254,31 @@ export default function Home() {
               - Use rotation Y-axis to face correct direction
 
               ---
+
+              📦 AVAILABLE 3D MODELS:
+
+              Use these .glb files to build the scene:
+
+              - "/models/atm.glb" → ATM
+              - "/models/box.glb" → Boxes (sit on floor)
+              - "/models/cashier.glb" → Cashier table
+              - "/models/cctv.glb" → Security camera (attach to wall near ceiling)
+              - "/models/chips.glb" / "chips2.glb" → Snacks (place on shelves)
+              - "/models/freezer.glb" → For ice cream
+              - "/models/fridge.glb" → For drinks
+              - "/models/juice.glb" → Place on shelves
+              - "/models/milk.glb" → Place on shelves
+              - "/models/pos.glb" → POS machine (goes **on top of cashier.glb**)
+              - "/models/poster1.glb" / "poster2.glb" → Attach to wall
+              - "/models/shelves.glb" → Use for placing small products
+
+              🧠 PLACEMENT RULES:
+              - "pos.glb" must sit on "cashier.glb"
+              - "chips.glb", "juice.glb", "milk.glb" must sit on "shelves.glb"
+              - "cctv.glb", "poster1.glb", "poster2.glb" should be attached to wall at Y ≈ 2.4
+              - Only use rotations Y = 0°, 90°, 180°, 270°
+
+              ---
               
               📄 OUTPUT FORMAT:
               
@@ -258,7 +296,7 @@ export default function Home() {
                   "position": [0, 0, 0],
                   "scale": [10, 0.1, 8],
                   "color": "lightgray",
-                  "log": "2 images analyzed. Estimated floor: 10m x 8m. Glass entrance at front. Walls on left, right, back."
+                  "log": "Floor detected with dimensions nxn m",
                 },
                 {
                   "type": "box",
@@ -293,9 +331,18 @@ Respond with a pure JSON array. No extra text or markdown.`,
     });
 
     const data = await response.json();
-    let resultText = data?.result || "";
-    resultText = resultText.replace(/```json|```/g, "").trim();
-    const sceneObjects = JSON.parse(resultText);
+    let sceneObjects: SceneItem[] = [];
+
+    if (typeof data?.result === "string") {
+      // If it's a string, clean it and parse it
+      const cleaned = data.result.replace(/```json|```/g, "").trim();
+      sceneObjects = JSON.parse(cleaned);
+    } else if (Array.isArray(data?.result)) {
+      // Already parsed JSON array
+      sceneObjects = data.result;
+    } else {
+      throw new Error("Unexpected result format from API");
+    }
 
     setSceneData(sceneObjects);
     setAnalysisResponse("✅ Floor and walls loaded!");
@@ -403,10 +450,11 @@ Respond with a pure JSON array. No extra text or markdown.`,
         updatedScene = parsed;
 
         const corrected = await fixFloatingModels(parsed);
+        const correctedScene = fixSceneObjects(corrected);
 
-        setSceneData(corrected); 
+        setSceneData(correctedScene); 
 
-        const floor = corrected[0];
+        const floor = correctedScene[0];
         if (floor?.message) {
           addChatMessage({ role: "assistant", content: floor.message });
         } else {
@@ -493,12 +541,156 @@ Respond with a pure JSON array. No extra text or markdown.`,
     });
   };
 
+  const analyzeSketch = async (base64: string) => {
+    addChatMessage({ role: "assistant", content: "🧠 Analyzing your sketch..." });
+  
+    const imagePayload = {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `This is a sketch of a 7-Eleven store layout. Analyze it and return a JSON array of floor and wall objects, plus any shelving or estimates. Respond ONLY with the scene array.`,
+            },
+            {
+              type: "image_url",
+              image_url: { url: base64 },
+            },
+          ],
+        },
+      ],
+    };
+  
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagePayload }),
+      });
+  
+      const data = await response.json();
+      let sceneObjects: SceneItem[] = [];
+
+      if (typeof data?.result === "string") {
+        // If it's a string, clean it and parse it
+        const cleaned = data.result.replace(/```json|```/g, "").trim();
+        sceneObjects = JSON.parse(cleaned);
+      } else if (Array.isArray(data?.result)) {
+        // Already parsed JSON array
+        sceneObjects = data.result;
+      } else {
+        throw new Error("Unexpected result format from API");
+      }
+  
+      setSceneData(sceneObjects);
+      setAnalysisResponse("✅ Scene from sketch loaded!");
+  
+      const floor = sceneObjects.find((obj: SceneItem) => obj.type === "box" && obj.position?.[1] === 0);
+      if (floor?.message) {
+        addChatMessage({ role: "assistant", content: floor.message });
+      } else {
+        addChatMessage({ role: "assistant", content: "✅ Scene generated from sketch." });
+      }
+    } catch (err) {
+      console.error("Sketch analysis failed:", err);
+      setAnalysisResponse("❌ Failed to analyze sketch.");
+      addChatMessage({ role: "assistant", content: "❌ Could not process your sketch." });
+    }
+  };
+
+  function fixSceneObjects(sceneData: SceneItem[]): SceneItem[] {
+    const cashier = sceneData.find(o => o.path === "/models/cashier.glb");
+    const shelves = sceneData.find(o => o.path === "/models/shelves.glb");
+  
+    return sceneData.map(obj => {
+      // Snap rotation to 0, 90, 180, 270
+      if (obj.rotation) {
+        obj.rotation[1] = Math.round(obj.rotation[1] / 90) * 90;
+      }
+  
+      // Place POS on cashier
+      if (obj.path === "/models/pos.glb" && cashier) {
+        const [cx, cy, cz] = cashier.position ?? [0, 0, 0];
+        const cashierHeight = cashier.scale?.[1] ?? 1;
+        const posHeight = obj.scale?.[1] ?? 1;
+        obj.position = [cx, cy + cashierHeight / 2 + posHeight / 2, cz];
+      }
+  
+      // Place products on shelves
+      const productModels = [
+        "/models/chips.glb",
+        "/models/chips2.glb",
+        "/models/milk.glb",
+        "/models/juice.glb",
+      ];
+  
+      if (productModels.includes(obj.path || "") && shelves) {
+        const [sx, sy, sz] = shelves.position ?? [0, 0, 0];
+        const shelfHeight = shelves.scale?.[1] ?? 1;
+        const itemHeight = obj.scale?.[1] ?? 1;
+        obj.position = [sx, sy + shelfHeight / 2 + itemHeight / 2, sz];
+      }
+  
+      return obj;
+    });
+  }
+
+
+
   return (
     <main className="flex flex-col h-screen bg-gray-50 text-gray-900">
       {/* Header */}
       <header className="bg-neutral-700 text-white shadow-md px-6 py-4 text-xl font-bold border-b border-gray-200">
         Unity Scene AI
       </header>
+
+      {showSketchModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg w-[850px] max-w-full">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span>🖋️</span> Sketch Store Layout
+            </h3>
+
+            {/* Sketch Canvas */}
+            <SketchCanvas ref={sketchCanvasRef} />
+
+            {/* Footer Buttons */}
+            <div className="mt-4 flex justify-between items-center">
+              {/* Left: Cancel */}
+              <button
+                onClick={() => setShowSketchModal(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Cancel
+              </button>
+
+              {/* Right: Clear + Analyze */}
+              <div className="space-x-2">
+                <button
+                  onClick={() => sketchCanvasRef.current?.clearCanvas()}
+                  className="px-4 py-2 bg-gray-600 text-white rounded"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    const base64 = sketchCanvasRef.current?.getBase64();
+                    if (base64) {
+                      setShowSketchModal(false);
+                      handleUpload(base64);
+                    }
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  Analyze
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Upload Controls */}
       <div className="flex items-center gap-4 px-6 py-4 bg-gray-300 border-b border-gray-200">
@@ -514,6 +706,13 @@ Respond with a pure JSON array. No extra text or markdown.`,
           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
         >
           Upload & Analyze
+        </button>
+
+        <button
+          onClick={() => setShowSketchModal(true)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+        >
+          Draw
         </button>
       </div>
 
