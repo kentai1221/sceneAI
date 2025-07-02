@@ -49,37 +49,15 @@ Avoid:
 - Objects must stay within floor boundaries:
   - X ∈ [-floor.scale[0]/2, floor.scale[0]/2]
   - Z ∈ [-floor.scale[2]/2, floor.scale[2]/2]
+- If any object appears outside the walls or floating in the image:
+  - Reposition it so it fits inside the floor area.
+  - Keep it aligned to nearby walls or shelves.
+  - Avoid placing objects beyond the bounding box of the room.
 
 - All models must:
   - Be aligned with walls or aisle grid
   - Only rotate in 90° increments: 0°, 90°, 180°, 270° (Y axis)
   - Never be placed diagonally or at random angles
-
----
-
-🛒 SHELVING AND AISLES:
-
-Shelving must:
-- Sit directly on the floor
-- Face into aisles or customer-facing directions
-- Be placed against walls or between aisles
-- Not be rotated diagonally
-- Not be in unusable or blocked positions (like corners)
-
-A shelf is wrong if:
-- It intersects a wall
-- It floats above the floor
-- Its Y-rotation is not a multiple of 90°
-- It is isolated with no purpose
-
----
-
-SHELF ROTATION ENFORCEMENT:
-
-- Shelving must be aligned with room layout — no diagonal placement allowed.
-- Valid Y-rotation values: only [0, 90, 180, 270] — no decimals or close approximations.
-- If rotation is not an exact multiple of 90°, correct it by rounding to the nearest.
-- Validate using the image — shelves must appear axis-aligned, not tilted visually.
 
 ---
 
@@ -106,6 +84,21 @@ Use these .glb files to build the scene:
 - "cctv.glb", "poster1.glb", "poster2.glb" should be attached to wall at Y ≈ 2.4
 - Only use rotations Y = 0°, 90°, 180°, 270°
 
+STORE OBJECTS:
+
+Detect the position of these items in the photos or sketch, estimate the position and rotation, add model objects using:
+
+Example:
+{
+  "type": "model",
+  "path": "/models/xxx.glb",
+  "position": [x, y, z],
+  "rotation": [0, Y-degrees, 0],
+  "scale": [1, 1, 1]
+}
+
+If you cannot detect an object, you can try to estimate its position based on the layout.
+
 ---
 
 📸 IMAGE UNDERSTANDING:
@@ -125,7 +118,13 @@ If an image of the 3D canvas is provided:
 
 - Always return a complete, corrected JSON array
 - Floor must be the first object
-- Add a "message" field to the floor describing what you fixed or changed
+- Add a "message" field to the first object describing what you fixed or changed
+- Ensure all models are within floor bounds. Move any out-of-bounds models inside.
+- The first object's "log" must clearly summarize what the assistant changed in the scene.
+  For example:
+    "log": "Added freezer near fridge and repositioned cashier."
+    "log": "Rotated POS 90° to face customer side."
+    "log": "Placed ATM next to entrance."
 - Do not return any text or markdown — just the JSON array
 
 ---
@@ -193,7 +192,8 @@ For every model in the scene:
     let fixedScene = null;
 
     try {
-      const parsed = JSON.parse(rawReply);
+      const cleanedRawReply = rawReply.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleanedRawReply);
       if (Array.isArray(parsed)) {
         fixedScene = fixSceneObjects(parsed);
       }

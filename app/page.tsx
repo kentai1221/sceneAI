@@ -145,178 +145,210 @@ export default function Home() {
               type: "text",
               text: `You are analyzing one or more images of a 7-Eleven store interior.
 
-              These images may include:
-              - Real-world photos of the store (showing shelves, walls, ceiling, entrances)
-              - Layout sketches or top-down floorplans
-              - Photos that include partial structure or open entrances
-              
-              Your job is to reconstruct the basic structure of the store as a 3D scene in JSON format.
-              
-              ---
-              
-              🎯 TASK:
-              
-              Return a **pure JSON array** of 3D objects with the following format:
-              
-              1. A single floor object:
-                - type: "box"
-                - position: [0, 0, 0]
-                - scale: [width, 0.1, depth] (in meters)
-                - color: "lightgray"
-                - log: "...summary of what you detected..."
-              
-              2. One or more wall objects:
-                - type: "box"
-                - position: [x, y, z]
-                - scale: [x, y, z]
-                - rotation: [x, y, z]
-                - color: "white"
-                - material (optional): "reflective"
-              
-              ---
-              
-              🎨 MATERIAL RULES:
-              
-              - **Walls must be white and reflective**.
-                - Use "color": "white" for all wall objects.
-                - Optionally add "material": "reflective" to indicate a glossy, light-reflecting surface.
-                - Example:
-                  {
-                    "type": "box",
-                    "position": [-5, 1.25, 0],
-                    "scale": [0.2, 2.5, 8],
-                    "color": "white",
-                    "material": "reflective"
-                  }
-              
-              - **Floor should not be reflective**.
-                - Use "color": "lightgray" and no "material" field for the floor.
-              
-              ---
+These images may include:
+- Real-world photos of the store (showing shelves, walls, ceiling, entrances)
+- Layout sketches or top-down floorplans
+- Photos that include partial structure or open entrances
 
-              🧱 FLOOR MATERIAL:
-
-              - The floor should simulate tiled indoor flooring.
-              - Always set: "texturePath": "/Tiles.png" on the floor object.
-              - The floor color should still be "lightgray" as a fallback.
-              - This texture will be tiled across the floor to simulate real tiles.
-
-              Example floor object:
-              {
-                "type": "box",
-                "position": [0, 0, 0],
-                "scale": [10, 0.1, 8],
-                "color": "lightgray",
-                "texturePath": "/Tiles.png",
-                "log": "..."
-              }
-
-              ---
-              
-              📐 GEOMETRY RULES:
-              
-              - Floor must always be centered at [0, 0, 0]
-              - Wall height: typically 2.5 meters
-              - Wall thickness: ~0.2 meters
-              - Position each wall so that it sits perfectly on the floor:
-                - Y = scale.y / 2
-              - Do not create floating, overlapping, or misaligned geometry
-              - Units are in meters
-              
-              ---
-              
-              🧠 INTELLIGENT STRUCTURE DETECTION:
-              
-              From the images, determine:
-              - Estimated size of the store
-              - Where structural walls are located
-              - Whether the front is open, glass, door, etc.
-              
-              Do **not** hardcode any assumptions (like "always 3 walls").
-              Use visual reasoning and layout clues to decide how many walls and where they should be.
-              
-              ---
-
-              🧰 COMMON STORE OBJECTS:
-
-             It must have a shelving, if you can not detect the position, just estimate the position and rotation, add model objects using:
-
-              {
-                "type": "model",
-                "path": "/models/shelving.glb",
-                "position": [x, y, z],
-                "rotation": [0, Y-degrees, 0],
-                "scale": [1, 1, 1]
-              }
-
-              - Place shelves along walls or between aisles
-              - Ensure shelves are placed on the floor: Y-position = height / 2
-              - Use rotation Y-axis to face correct direction
-
-              ---
-
-              📦 AVAILABLE 3D MODELS:
-
-              Use these .glb files to build the scene:
-
-              - "/models/atm.glb" → ATM
-              - "/models/box.glb" → Boxes (sit on floor)
-              - "/models/cashier.glb" → Cashier table
-              - "/models/cctv.glb" → Security camera (attach to wall near ceiling)
-              - "/models/chips.glb" / "chips2.glb" → Snacks (place on shelves)
-              - "/models/freezer.glb" → For ice cream
-              - "/models/fridge.glb" → For drinks
-              - "/models/juice.glb" → Place on shelves
-              - "/models/milk.glb" → Place on shelves
-              - "/models/pos.glb" → POS machine (goes **on top of cashier.glb**)
-              - "/models/poster1.glb" / "poster2.glb" → Attach to wall
-              - "/models/shelves.glb" → Use for placing small products
-
-              🧠 PLACEMENT RULES:
-              - "pos.glb" must sit on "cashier.glb"
-              - "chips.glb", "juice.glb", "milk.glb" must sit on "shelves.glb"
-              - "cctv.glb", "poster1.glb", "poster2.glb" should be attached to wall at Y ≈ 2.4
-              - Only use rotations Y = 0°, 90°, 180°, 270°
-
-              ---
-              
-              📄 OUTPUT FORMAT:
-              
-              - Return **only a JSON array** (no markdown, no extra text)
-              - Must include:
-                - 1 floor object (first)
-                - N wall objects
-              - All objects: must have type, position, scale, color
-              - Wall objects: should also include "material": "reflective"
-              
-              Example:
-              [
-                {
-                  "type": "box",
-                  "position": [0, 0, 0],
-                  "scale": [10, 0.1, 8],
-                  "color": "lightgray",
-                  "log": "Floor detected with dimensions nxn m",
-                },
-                {
-                  "type": "box",
-                  "position": [-5, 1.25, 0],
-                  "scale": [0.2, 2.5, 8],
-                  "color": "white",
-                  "material": "reflective"
-                }
-              ]
----
-
-🎨 NOTES:
-
-- Use visual clues like corners, shadows, shelving alignment, and doors
-- You may use estimation if layout is missing
-- Avoid floating walls or disconnected elements
+Your job is to reconstruct the basic structure AND store contents as a 3D scene in JSON format.
 
 ---
 
-Respond with a pure JSON array. No extra text or markdown.`,
+TASK:
+
+Return a pure JSON array of 3D objects with the following format:
+
+1. A single floor object:
+  - type: "box"
+  - position: [0, 0, 0]
+  - scale: [width, 0.1, depth] (in meters)
+  - color: "lightgray"
+  - log: "...summary of what you detected..."
+  - texturePath: "/Tiles.png"
+
+2. One or more wall objects:
+  - type: "box"
+  - position: [x, y, z]
+  - scale: [x, y, z]
+  - rotation: [x, y, z]
+  - color: "white"
+  - material: "reflective"
+
+3. All other detected store objects (VERY IMPORTANT):
+  - type: "model"
+  - path: (e.g. "/models/shelves.glb")
+  - position: [x, y, z]
+  - rotation: [0, Y-degrees, 0]
+  - scale: [1, 1, 1]
+
+Do not skip objects like:
+- cashier counter
+- pos.glb
+- shelves
+- fridge
+- freezer
+- cctv
+- posters
+- snacks and products
+
+If visible or strongly implied, include them using the correct 3D model and estimate their placement.
+
+---
+
+MATERIAL RULES:
+
+- Walls must be white and reflective
+- Floor must be lightgray and include texturePath: "/Tiles.png"
+- Do NOT make the floor reflective
+
+---
+
+FLOOR EXAMPLE:
+
+{
+  "type": "box",
+  "position": [0, 0, 0],
+  "scale": [10, 0.1, 8],
+  "color": "lightgray",
+  "texturePath": "/Tiles.png",
+  "log": "Floor detected with dimensions 10x8 meters"
+}
+
+---
+
+GEOMETRY RULES:
+
+- Floor is centered at [0, 0, 0]
+- Walls must be placed with Y = height / 2
+- Wall height ≈ 2.5 meters
+- Thickness ≈ 0.2 meters
+- Units in meters
+- No floating or overlapping objects
+- Use only rotation angles 0, 90, 180, 270
+
+---
+
+AVAILABLE 3D MODELS:
+
+Use these glb files when objects are present:
+
+- /models/atm.glb
+- /models/box.glb
+- /models/cashier.glb
+- /models/cctv.glb
+- /models/chips.glb or chips2.glb
+- /models/freezer.glb
+- /models/fridge.glb
+- /models/juice.glb
+- /models/milk.glb
+- /models/pos.glb
+- /models/poster1.glb or poster2.glb
+- /models/shelves.glb
+
+📐 MODEL DIMENSIONS (in meters):
+
+Use these real-world dimensions for the 3D models (width, height, depth):
+
+- atm.glb → [0.55, 1.19, 0.52]
+- box.glb → [0.56, 0.45, 0.46]
+- cashier.glb → [3.79, 0.93, 0.71]
+- cctv.glb → [0.09, 0.23, 0.3]
+- chips.glb → [0.19, 0.26, 0.09]
+- chips2.glb → [0.21, 0.29, 0.13]
+- fridge.glb → [0.76, 1.65, 0.64]
+- juice.glb → [0.07, 0.23, 0.07]
+- milk.glb → [0.10, 0.20, 0.07]
+- pos.glb → [0.44, 0.35, 0.53]
+- poster1.glb → [0.31, 0.43, 0.01]
+- poster2.glb → [0.89, 1.03, 0.02]
+- shelves.glb → [0.97, 2.05, 0.71]
+
+These are the accurate width, height, and depth of each model.
+
+Always place models using these sizes to avoid overlapping or floating.
+
+PLACEMENT RULES:
+
+- pos.glb must sit on top of cashier.glb
+- juice.glb, milk.glb, chips.glb must sit on shelves.glb
+- cctv and posters must attach to wall at Y ≈ 2.4
+- Use rotation: only 0, 90, 180, or 270 degrees
+
+📏 SHELF COMPOSITION RULE:
+
+If the photo shows one long shelf or fridge that is larger than any available model:
+
+- Use **multiple adjacent copies** of smaller models (like "shelves.glb") to simulate it.
+- Align them tightly side-by-side to form one continuous unit.
+- You may repeat the same model 2–4 times depending on the visual length.
+- Keep consistent Y (height) and spacing (small gap or zero gap).
+
+For example, if a shelf in the photo spans ~3 meters and "shelves.glb" is ~1 meter wide, use 3 copies of it in a row.
+
+---
+🧱 SHELF DENSITY AND DUPLICATION RULE:
+
+- It is common for 7-Eleven stores to have:
+  - 3–4 central aisle shelves (standing individually in the center)
+  - 4–5 shelving units along the back wall, often forming a continuous shelf line
+
+- You are allowed and encouraged to **duplicate** "shelves.glb" model:
+  - Use multiple copies side-by-side (with 0 or minimal gaps)
+  - Align them visually straight and evenly spaced
+
+🧠 EXAMPLE PLACEMENT STRATEGY:
+
+- If you see one long shelf in the image:
+  - Place 3 or more shelves.glb copies in a row (aligned on X or Z)
+- If there are multiple vertical shelves in front of a wall:
+  - Place 4–5 in tight rows close to the wall
+
+📚 SHELF LAYOUT STRATEGY:
+
+- Use **multiple shelves.glb** side-by-side to simulate large shelf rows.
+- At the back wall, place 4–5 shelves.glb in a row with tight spacing (Z ≈ wall - depth/2).
+- In the center of the store, place 3–4 shelves.glb in a line (Z-direction), perpendicular to the back wall.
+- Always align shelves so they do not float or intersect the wall.
+- Allow shelf repetition freely, as is common in convenience stores.
+
+ If a shelf is placed against a wall, set its position.z so its back edge touches the wall:
+  position.z = wallZ - (shelfDepth / 2);
+
+SCENE FORMAT:
+
+Return ONLY a JSON array with:
+- 1 floor object (first)
+- N wall objects
+- N detected model objects
+
+Every object must include:
+- type
+- position
+- scale
+- color
+- (optionally) rotation, texturePath, material
+
+Example object:
+
+{
+  "type": "model",
+  "path": "/models/fridge.glb",
+  "position": [2, 0.9, 4],
+  "rotation": [0, 90, 0],
+  "scale": [1, 1, 1]
+}
+
+---
+
+NOTES:
+
+- Use visible cues: alignment, shadows, shapes
+- If object is partially visible, you may still include it
+- If detection is uncertain, make a best guess
+
+---
+
+Respond ONLY with a valid JSON array. No markdown, code fences, or explanation.`,
             },
             ...imageParts,
           ],
@@ -360,10 +392,13 @@ Respond with a pure JSON array. No extra text or markdown.`,
   }
 };
 
-  const addChatMessage = (msg: { role: string; content: string }) => {
+  const addChatMessage = (msg: { role: string; content: string | object }) => {
     setChatMessages((prev) => {
-      const updated = [...prev, msg];
-      return updated;
+      const content = typeof msg.content === "string"
+        ? msg.content
+        : JSON.stringify(msg.content, null, 2); // handle object
+
+      return [...prev, { role: msg.role, content }];
     });
   };
 
@@ -410,33 +445,33 @@ Respond with a pure JSON array. No extra text or markdown.`,
     );
   }
 
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return;
+ const handleSendMessage = async () => {
+  if (!chatInput.trim()) return;
 
-    const canvasImage = getCanvasImage();
-    const updatedMessages = [...chatMessages, { role: "user", content: chatInput }];
-    setChatMessages(updatedMessages);
-    setChatInput("");
-    //console.log("Sending messages to AI:", updatedMessages);
-  
-    const payloadMessages = [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: chatInput },
-          ...(canvasImage
-            ? [{ type: "image_url", image_url: { url: canvasImage } }]
-            : []),
-        ],
-      },
-    ];
+  const canvasImage = getCanvasImage();
+  const updatedMessages = [...chatMessages, { role: "user", content: chatInput }];
+  setChatMessages(updatedMessages);
+  setChatInput("");
 
-    console.log("Payload messages:", payloadMessages);
+  const payloadMessages = [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: chatInput },
+        ...(canvasImage
+          ? [{ type: "image_url", image_url: { url: canvasImage } }]
+          : []),
+      ],
+    },
+  ];
 
+  console.log("Payload messages:", payloadMessages);
+
+  try {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: payloadMessages, sceneData, }),
+      body: JSON.stringify({ messages: payloadMessages, sceneData }),
     });
 
     const data = await res.json();
@@ -444,31 +479,66 @@ Respond with a pure JSON array. No extra text or markdown.`,
 
     let updatedScene: SceneItem[] | null = null;
 
-     try {
-    const parsed = JSON.parse(assistantReply);
+    try {
+      let parsed: any;
+
+      if (typeof assistantReply === "string") {
+        try {
+          parsed = JSON.parse(assistantReply);
+        } catch (err) {
+          console.error("Failed to parse assistantReply:", err);
+          addChatMessage({ role: "assistant", content: assistantReply });
+          return;
+        }
+      } else {
+        parsed = assistantReply; // already an object
+      }
+
       if (Array.isArray(parsed)) {
         updatedScene = parsed;
 
         const corrected = await fixFloatingModels(parsed);
         const correctedScene = fixSceneObjects(corrected);
 
-        setSceneData(correctedScene); 
+        console.log("✅ Corrected scene from AI:", correctedScene);
 
-        const floor = correctedScene[0];
-        if (floor?.message) {
-          addChatMessage({ role: "assistant", content: floor.message });
+        if (Array.isArray(correctedScene) && correctedScene.length > 0) {
+          setSceneData([...correctedScene]); // ✅ This updates the canvas
+
+          // 🧠 Extract log/message from floor for chat
+          const floor = correctedScene.find(
+            (obj) => obj.type === "box" && obj.position?.[1] === 0
+          );
+          const message = floor?.log || floor?.message || "✅ Scene updated.";
+
+          addChatMessage({
+            role: "assistant",
+            content: typeof message === "string" ? message : JSON.stringify(message),
+          });
         } else {
-          addChatMessage({ role: "assistant", content: "✅ Scene updated." });
+          console.warn("❗ AI returned empty or invalid scene");
+          addChatMessage({
+            role: "assistant",
+            content: "⚠️ Received invalid scene from AI.",
+          });
         }
       } else {
-        // fallback if it's not a JSON array
+        // If not an array, just show the assistant's message
         addChatMessage({ role: "assistant", content: assistantReply });
       }
     } catch (e) {
-      // not JSON, just treat as a normal message
+      console.error("❌ Failed to parse assistant reply as JSON:", e);
       addChatMessage({ role: "assistant", content: assistantReply });
     }
-  };
+  } catch (err) {
+    console.error("❌ Failed to fetch from /api/chat:", err);
+    addChatMessage({
+      role: "assistant",
+      content: "❌ Something went wrong contacting the AI service.",
+    });
+  }
+};
+
 
   const handleSaveScene = async () => {
     const res = await fetch("/api/save-scene", {

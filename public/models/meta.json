@@ -1,0 +1,130 @@
+{
+  "/models/atm.glb": {
+    "size": [
+      0.55,
+      1.19,
+      0.52
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/box.glb": {
+    "size": [
+      0.56,
+      0.45,
+      0.46
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/cashier.glb": {
+    "size": [
+      3.79,
+      0.93,
+      0.71
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/cctv.glb": {
+    "size": [
+      0.09,
+      0.23,
+      0.3
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/chips.glb": {
+    "size": [
+      0.19,
+      0.26,
+      0.09
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/chips2.glb": {
+    "size": [
+      0.21,
+      0.29,
+      0.13
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/floor.glb": {
+    "size": [
+      11.48,
+      0.04,
+      6.75
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/freezer.glb": {
+    "size": [
+      null,
+      null,
+      null
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/fridge.glb": {
+    "size": [
+      0.76,
+      1.65,
+      0.64
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/juice.glb": {
+    "size": [
+      0.07,
+      0.23,
+      0.07
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/milk.glb": {
+    "size": [
+      0.1,
+      0.2,
+      0.07
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/pos.glb": {
+    "size": [
+      0.44,
+      0.35,
+      0.53
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/poster1.glb": {
+    "size": [
+      0.31,
+      0.43,
+      0.01
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/poster2.glb": {
+    "size": [
+      0.89,
+      1.03,
+      0.02
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/shelves.glb": {
+    "size": [
+      0.97,
+      2.05,
+      0.71
+    ],
+    "description": "TODO: Add description"
+  },
+  "/models/shelving.glb": {
+    "size": [
+      3.79,
+      0.93,
+      0.71
+    ],
+    "description": "TODO: Add description"
+  }
+}
