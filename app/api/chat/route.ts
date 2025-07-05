@@ -5,16 +5,14 @@ export async function POST(req: NextRequest) {
   const { messages, sceneData } = await req.json();
 
   const hasScene = Array.isArray(sceneData) && sceneData.length > 0;
-
   if (!hasScene) {
     return NextResponse.json({
       result: "❗ Please upload one or more images of a 7-Eleven store or a layout sketch before continuing.",
     });
   }
 
-  const sceneForAI = sceneData.map(({ message, ...rest }) => rest); // Remove `message` field
+  const sceneForAI = sceneData.map(({ message, ...rest }) => rest);
 
-  // 🧠 Build system message with the current scene
   const systemMessage = {
     role: "system",
     content: `You are a 3D scene assistant for designing realistic 7-Eleven store layouts.
@@ -43,6 +41,28 @@ Avoid:
 - Misaligned or tilted placements
 
 ---
+
+CASHIER PLACEMENT RULES
+
+If the cashier model (/models/cashier.glb) exceeds the floor bounds, adjust its scale so it fits entirely within the store.
+
+Use the floor's scale to define room size. Assume the floor is centered at position [0, 0, 0].
+
+Allow resizing the X (width) or Z (depth) of the cashier, but do not stretch it. Only shrink when necessary.
+
+Make sure the cashier fits within:
+
+X axis: from (-floorWidth / 2 + 0.5) to (floorWidth / 2 - 0.5)
+
+Z axis: from (-floorDepth / 2 + 0.5) to (floorDepth / 2 - 0.5)
+
+POS PLACEMENT RULES
+
+Place the POS (/models/pos.glb) centered on top of the cashier.
+
+Its Y position should be:
+cashier.position.y + (cashier.scale.y / 2) + (pos.scale.y / 2)
+
 
 📦 OBJECT PLACEMENT RULES (ALL OBJECTS):
 
@@ -115,8 +135,7 @@ If an image of the 3D canvas is provided:
 ---
 
 🎯 YOUR TASK:
-
-- Always return a complete, corrected JSON array
+- Do not remove any existing items / objects / shelves!
 - Floor must be the first object
 - Add a "message" field to the first object describing what you fixed or changed
 - Ensure all models are within floor bounds. Move any out-of-bounds models inside.
@@ -125,8 +144,13 @@ If an image of the 3D canvas is provided:
     "log": "Added freezer near fridge and repositioned cashier."
     "log": "Rotated POS 90° to face customer side."
     "log": "Placed ATM next to entrance."
-- Do not return any text or markdown — just the JSON array
-
+- Respond ONLY with a valid JSON array. Do NOT include markdown, logs, explanation, or extra fields outside the array.
+- Respond ONLY with a valid JSON array. Do NOT include markdown, logs, explanation, or extra fields outside the array.
+- Respond ONLY with a valid JSON array. Do NOT include markdown, logs, explanation, or extra fields outside the array.
+- 🚫 Never regenerate or replace the full scene.
+- 🚫 Never remove, modify, or reorder existing objects.
+- ✅ Always return the original scene objects exactly as-is, plus any new ones you are adding.
+- ✅ This must be a superset of the input — not a replacement or filtered list.
 ---
 
 For every model in the scene:
@@ -138,6 +162,7 @@ For every model in the scene:
   ${JSON.stringify(sceneForAI, null, 2)}
   `
   };
+
 
   const fullMessages = [systemMessage, ...messages];
 
@@ -187,23 +212,36 @@ For every model in the scene:
     }
 
     const json = await response.json();
-    const rawReply = json?.choices?.[0]?.message?.content || "No response";
-    console.log("Response:", rawReply);
-    let fixedScene = null;
+    const rawReply = json?.choices?.[0]?.message?.content || "";
+    console.log("🧠 Raw AI Reply:", rawReply);
 
+    // Clean up AI response
+    let cleaned= rawReply
+    .replace(/```json|```/g, "")           // remove markdown code blocks
+    .replace(/\/\/.*$/gm, "")              // remove JS-style comments
+    .replace(/,\s*([}\]])/g, "$1")         // remove trailing commas
+    .replace(/\r?\n|\r/g, "")              // remove newlines
+    .trim();
+
+    // Attempt to extract valid JSON array
+    const startIndex = cleaned.indexOf("[");
+    const endIndex = cleaned.lastIndexOf("]");
+    const jsonString = cleaned.slice(startIndex, endIndex + 1);
+
+    let parsed;
     try {
-      const cleanedRawReply = rawReply.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(cleanedRawReply);
-      if (Array.isArray(parsed)) {
-        fixedScene = fixSceneObjects(parsed);
-      }
-    } catch (e) {
-      console.error("Failed to parse AI JSON:", e);
+      parsed = JSON.parse(jsonString);
+    } catch (error) {
+      console.error("❌ JSON Parse Error:", error, "\n⛔ Cleaned:", jsonString);
+      return NextResponse.json({ result: rawReply, error: "AI returned invalid JSON" });
     }
 
-    return NextResponse.json({
-      result: fixedScene ?? rawReply,
-    });
+    if (!Array.isArray(parsed)) {
+      return NextResponse.json({ result: rawReply, error: "Expected JSON array" });
+    }
+
+    const fixedScene = fixSceneObjects(parsed);
+    return NextResponse.json({ result: fixedScene });
   } catch (err) {
     return NextResponse.json(
       { error: "Failed to call AI", detail: String(err) },

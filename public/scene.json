@@ -7,25 +7,25 @@
       0
     ],
     "scale": [
-      8,
+      10,
       0.1,
-      6
+      4
     ],
     "color": "lightgray",
     "texturePath": "/Tiles.png",
-    "log": "Ensured floor centered at y=0 with correct color and texture. Corrected all object heights to sit on floor. Moved CCTV camera and wall poster inside floor bounds and checked rotations to be in 90 degree increments. Adjusted POS model y-position to sit correctly on cashier. Removed duplicate chips model at same position. Verified shelves rotation aligned to walls and models placed inside floor boundaries."
+    "log": "Added products to shelves: chips, juice, and milk on appropriate positions."
   },
   {
     "type": "box",
     "position": [
-      4,
+      5,
       1.25,
       0
     ],
     "scale": [
       0.2,
       2.5,
-      6
+      4
     ],
     "rotation": [
       0,
@@ -38,14 +38,14 @@
   {
     "type": "box",
     "position": [
-      -4,
+      -5,
       1.25,
       0
     ],
     "scale": [
       0.2,
       2.5,
-      6
+      4
     ],
     "rotation": [
       0,
@@ -60,10 +60,10 @@
     "position": [
       0,
       1.25,
-      3
+      -2
     ],
     "scale": [
-      8,
+      10,
       2.5,
       0.2
     ],
@@ -74,197 +74,6 @@
     ],
     "color": "white",
     "material": "reflective"
-  },
-  {
-    "type": "box",
-    "position": [
-      0,
-      1.25,
-      -3
-    ],
-    "scale": [
-      8,
-      2.5,
-      0.2
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "color": "white",
-    "material": "reflective"
-  },
-  {
-    "type": "model",
-    "path": "/models/fridge.glb",
-    "position": [
-      -3.4,
-      0.00035378902224436626,
-      -2.7
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/fridge.glb",
-    "position": [
-      -2.6,
-      0.00035378902224436626,
-      -2.7
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/freezer.glb",
-    "position": [
-      3.4,
-      0.0002533302604107446,
-      -2.7
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      0.5,
-      -1.369611069002019e-7,
-      0
-    ],
-    "rotation": [
-      0,
-      90,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      0.5,
-      -1.369611069002019e-7,
-      1.5
-    ],
-    "rotation": [
-      0,
-      90,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      0.5,
-      -1.369611069002019e-7,
-      3
-    ],
-    "rotation": [
-      0,
-      90,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      -1.5,
-      -1.369611069002019e-7,
-      2.9
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      -0.5,
-      -1.369611069002019e-7,
-      2.9
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/shelves.glb",
-    "position": [
-      0.5,
-      -1.369611069002019e-7,
-      2.9
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
   },
   {
     "type": "model",
@@ -272,11 +81,11 @@
     "position": [
       3.1,
       -7.629394360719743e-8,
-      2.7
+      0
     ],
     "rotation": [
       0,
-      180,
+      270,
       0
     ],
     "scale": [
@@ -290,26 +99,7 @@
     "path": "/models/pos.glb",
     "position": [
       3.1,
-      0.9999999237060564,
-      2.7
-    ],
-    "rotation": [
-      0,
-      180,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "type": "model",
-    "path": "/models/chips.glb",
-    "position": [
-      0.5,
-      0.9999998630388931,
+      0.94,
       0
     ],
     "rotation": [
@@ -325,11 +115,11 @@
   },
   {
     "type": "model",
-    "path": "/models/milk.glb",
+    "path": "/models/fridge.glb",
     "position": [
-      0.5,
-      0.9999998630388931,
-      0
+      -4.5,
+      0.00035378902224442177,
+      -1.3
     ],
     "rotation": [
       0,
@@ -344,11 +134,11 @@
   },
   {
     "type": "model",
-    "path": "/models/juice.glb",
+    "path": "/models/fridge.glb",
     "position": [
-      0.5,
-      0.9999998630388931,
-      0
+      -4.5,
+      0.00035378902224442177,
+      -0.4
     ],
     "rotation": [
       0,
@@ -363,11 +153,106 @@
   },
   {
     "type": "model",
-    "path": "/models/cctv.glb",
+    "path": "/models/fridge.glb",
     "position": [
-      -3.8,
-      -0.000026899547759473563,
-      -2.85
+      -4.5,
+      0.00035378902224442177,
+      0.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/shelves.glb",
+    "position": [
+      -4.3,
+      -1.369611069002019e-7,
+      1.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/shelves.glb",
+    "position": [
+      -1,
+      -1.369611069002019e-7,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/shelves.glb",
+    "position": [
+      -2,
+      -1.369611069002019e-7,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/shelves.glb",
+    "position": [
+      2,
+      -1.369611069002019e-7,
+      -1.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/shelves.glb",
+    "position": [
+      0,
+      -1.369611069002019e-7,
+      0
     ],
     "rotation": [
       0,
@@ -384,13 +269,2065 @@
     "type": "model",
     "path": "/models/poster1.glb",
     "position": [
-      3.8,
-      -1.3325245973305755e-7,
-      -2.7
+      4.345,
+      1.78,
+      -1.9
     ],
     "rotation": [
       0,
-      180,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/poster2.glb",
+    "position": [
+      -3.255,
+      1.43,
+      -1.7
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/box.glb",
+    "position": [
+      4.5,
+      -0.00017488428011003254,
+      -1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/box.glb",
+    "position": [
+      4,
+      -0.00017488428011003254,
+      -1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.3,
+      0.0003956146633034008,
+      1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -4.3,
+      0.00000484167611636277,
+      1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      -4.3,
+      -5.152905000471719e-7,
+      1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -4.3,
+      -0.000005195645100375401,
+      1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -4.3,
+      0.00000484167611636277,
+      1.5
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.66375,
+      0.12499986303889321,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.42125,
+      0.12499986303889321,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.17875,
+      0.12499986303889321,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -3.93625,
+      0.12499986303889321,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.66375,
+      0.5349998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.42125,
+      0.5349998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.17875,
+      0.5349998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -3.93625,
+      0.5349998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.66375,
+      0.9449998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.42125,
+      0.9449998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.17875,
+      0.9449998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -3.93625,
+      0.9449998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.66375,
+      1.354999863038893,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.42125,
+      1.354999863038893,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.17875,
+      1.354999863038893,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -3.93625,
+      1.354999863038893,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.66375,
+      1.7649998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.42125,
+      1.7649998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -4.17875,
+      1.7649998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -3.93625,
+      1.7649998630388932,
+      1.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.36375,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.12125,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.87875,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.63625,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.36375,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.12125,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.87875,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.63625,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.36375,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.12125,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.87875,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.63625,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.36375,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.12125,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.87875,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.63625,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.36375,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -1.12125,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.87875,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips2.glb",
+    "position": [
+      -0.63625,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.36375,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.12125,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.8787500000000001,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.63625,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.36375,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.12125,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.8787500000000001,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.63625,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.36375,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.12125,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.8787500000000001,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.63625,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.36375,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.12125,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.8787500000000001,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.63625,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.36375,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -2.12125,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.8787500000000001,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/juice.glb",
+    "position": [
+      -1.63625,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.63625,
+      0.12499986303889321,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.87875,
+      0.12499986303889321,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.12125,
+      0.12499986303889321,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.36375,
+      0.12499986303889321,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.63625,
+      0.5349998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.87875,
+      0.5349998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.12125,
+      0.5349998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.36375,
+      0.5349998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.63625,
+      0.9449998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.87875,
+      0.9449998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.12125,
+      0.9449998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.36375,
+      0.9449998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.63625,
+      1.354999863038893,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.87875,
+      1.354999863038893,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.12125,
+      1.354999863038893,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.36375,
+      1.354999863038893,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.63625,
+      1.7649998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      1.87875,
+      1.7649998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.12125,
+      1.7649998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/milk.glb",
+    "position": [
+      2.36375,
+      1.7649998630388932,
+      -1.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.36375,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.12125000000000002,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.12124999999999997,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.36375,
+      0.12499986303889321,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.36375,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.12125000000000002,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.12124999999999997,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.36375,
+      0.5349998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.36375,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.12125000000000002,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.12124999999999997,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.36375,
+      0.9449998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.36375,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.12125000000000002,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.12124999999999997,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.36375,
+      1.354999863038893,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.36375,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      -0.12125000000000002,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.12124999999999997,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "type": "model",
+    "path": "/models/chips.glb",
+    "position": [
+      0.36375,
+      1.7649998630388932,
+      0.25
+    ],
+    "rotation": [
+      0,
+      0,
       0
     ],
     "scale": [

@@ -4,7 +4,7 @@ import SceneCanvas from "@/app/ui/SceneCanvas";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import SketchCanvas, { SketchCanvasRef } from "@/app/ui/SketchCanvas";
-
+import { fixSceneObjects } from "@/app/ui/fixSceneObjects";
 
 function getModelSizeFromScene(scene: THREE.Object3D): [number, number, number] {
   const box = new THREE.Box3().setFromObject(scene);
@@ -214,6 +214,13 @@ FLOOR EXAMPLE:
   "log": "Floor detected with dimensions 10x8 meters"
 }
 
+📐 SCENE DIMENSION RULES:
+
+- Use 3D model dimensions to estimate the minimum required store size.
+- The cashier is 3.79m wide. If placed along X, ensure floor.scale[0] >= 4.
+- Avoid creating large unused space. Keep floor dimensions tight to fit all items plus reasonable walking space.
+- Total floor size should be: just big enough to fit all placed objects + ~1m spacing buffer.
+
 ---
 
 GEOMETRY RULES:
@@ -225,6 +232,13 @@ GEOMETRY RULES:
 - Units in meters
 - No floating or overlapping objects
 - Use only rotation angles 0, 90, 180, 270
+
+🚪 OPEN WALL RULE:
+
+If a wall is missing in the sketch, do not add it in the scene. Leave it open to represent an entrance.
+
+- Only add walls where they are clearly drawn.
+- If only 3 walls are drawn, assume the open side is the customer entrance.
 
 ---
 
@@ -249,19 +263,19 @@ Use these glb files when objects are present:
 
 Use these real-world dimensions for the 3D models (width, height, depth):
 
-- atm.glb → [0.55, 1.19, 0.52]
-- box.glb → [0.56, 0.45, 0.46]
-- cashier.glb → [3.79, 0.93, 0.71]
-- cctv.glb → [0.09, 0.23, 0.3]
-- chips.glb → [0.19, 0.26, 0.09]
-- chips2.glb → [0.21, 0.29, 0.13]
-- fridge.glb → [0.76, 1.65, 0.64]
-- juice.glb → [0.07, 0.23, 0.07]
-- milk.glb → [0.10, 0.20, 0.07]
-- pos.glb → [0.44, 0.35, 0.53]
-- poster1.glb → [0.31, 0.43, 0.01]
-- poster2.glb → [0.89, 1.03, 0.02]
-- shelves.glb → [0.97, 2.05, 0.71]
+- atm.glb → [0.55, 1.19, 0.52], front: X+
+- box.glb → [0.56, 0.45, 0.46], front: X+
+- cashier.glb → [3.79, 0.93, 0.71], front: X+
+- cctv.glb → [0.09, 0.23, 0.3], front: Z+
+- chips.glb → [0.19, 0.26, 0.09], front: X+
+- chips2.glb → [0.21, 0.29, 0.13], front: X+
+- fridge.glb → [0.76, 1.65, 0.64], front: X+
+- juice.glb → [0.07, 0.23, 0.07], front: X+
+- milk.glb → [0.10, 0.20, 0.07], front: X+
+- pos.glb → [0.44, 0.35, 0.53], front: Z+
+- poster1.glb → [0.31, 0.43, 0.01], front: X+
+- poster2.glb → [0.89, 1.03, 0.02], front: X+
+- shelves.glb → [0.97, 2.05, 0.71], front: X+
 
 These are the accurate width, height, and depth of each model.
 
@@ -376,7 +390,8 @@ Respond ONLY with a valid JSON array. No markdown, code fences, or explanation.`
       throw new Error("Unexpected result format from API");
     }
 
-    setSceneData(sceneObjects);
+    const correctedScene = fixSceneObjects(sceneObjects);
+    setSceneData(correctedScene);
     setAnalysisResponse("✅ Floor and walls loaded!");
     
     const floor = sceneObjects.find((obj: SceneItem) => obj.type === "box" && obj.position?.[1] === 0);
@@ -653,7 +668,8 @@ Respond ONLY with a valid JSON array. No markdown, code fences, or explanation.`
         throw new Error("Unexpected result format from API");
       }
   
-      setSceneData(sceneObjects);
+      const correctedScene = fixSceneObjects(sceneObjects);
+      setSceneData(correctedScene);
       setAnalysisResponse("✅ Scene from sketch loaded!");
   
       const floor = sceneObjects.find((obj: SceneItem) => obj.type === "box" && obj.position?.[1] === 0);
@@ -668,45 +684,6 @@ Respond ONLY with a valid JSON array. No markdown, code fences, or explanation.`
       addChatMessage({ role: "assistant", content: "❌ Could not process your sketch." });
     }
   };
-
-  function fixSceneObjects(sceneData: SceneItem[]): SceneItem[] {
-    const cashier = sceneData.find(o => o.path === "/models/cashier.glb");
-    const shelves = sceneData.find(o => o.path === "/models/shelves.glb");
-  
-    return sceneData.map(obj => {
-      // Snap rotation to 0, 90, 180, 270
-      if (obj.rotation) {
-        obj.rotation[1] = Math.round(obj.rotation[1] / 90) * 90;
-      }
-  
-      // Place POS on cashier
-      if (obj.path === "/models/pos.glb" && cashier) {
-        const [cx, cy, cz] = cashier.position ?? [0, 0, 0];
-        const cashierHeight = cashier.scale?.[1] ?? 1;
-        const posHeight = obj.scale?.[1] ?? 1;
-        obj.position = [cx, cy + cashierHeight / 2 + posHeight / 2, cz];
-      }
-  
-      // Place products on shelves
-      const productModels = [
-        "/models/chips.glb",
-        "/models/chips2.glb",
-        "/models/milk.glb",
-        "/models/juice.glb",
-      ];
-  
-      if (productModels.includes(obj.path || "") && shelves) {
-        const [sx, sy, sz] = shelves.position ?? [0, 0, 0];
-        const shelfHeight = shelves.scale?.[1] ?? 1;
-        const itemHeight = obj.scale?.[1] ?? 1;
-        obj.position = [sx, sy + shelfHeight / 2 + itemHeight / 2, sz];
-      }
-  
-      return obj;
-    });
-  }
-
-
 
   return (
     <main className="flex flex-col h-screen bg-gray-50 text-gray-900">

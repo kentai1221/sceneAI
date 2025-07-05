@@ -1,10 +1,9 @@
-// app/api/size/route.ts
 import { NextRequest } from 'next/server';
-import { readdirSync, readFileSync, writeFileSync } from 'fs';
+import { readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { NodeIO } from '@gltf-transform/core';
 
-export const runtime = 'node'; // ✅ Only valid in App Router
+export const runtime = 'node'; // ✅ Required for App Router on server side
 
 export async function GET(req: NextRequest) {
   const modelDir = join(process.cwd(), 'public/models');
@@ -20,7 +19,7 @@ export async function GET(req: NextRequest) {
     try {
       doc = io.read(glbPath);
     } catch (e) {
-      console.error(`Failed to read ${file}:`, e);
+      console.error(`❌ Failed to read ${file}:`, e);
       continue;
     }
 
@@ -41,10 +40,11 @@ export async function GET(req: NextRequest) {
 
         const accessor = pos.getArray();
         if (!accessor) continue;
+
         for (let i = 0; i < accessor.length; i += 3) {
-          min[0] = Math.min(min[0], accessor[i]);
-          min[1] = Math.min(min[1], accessor[i + 1]);
-          min[2] = Math.min(min[2], accessor[i + 2]);
+          min[0] = Math.min(min[0], accessor[i]);     // X
+          min[1] = Math.min(min[1], accessor[i + 1]); // Y
+          min[2] = Math.min(min[2], accessor[i + 2]); // Z
 
           max[0] = Math.max(max[0], accessor[i]);
           max[1] = Math.max(max[1], accessor[i + 1]);
@@ -53,17 +53,32 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const size = max.map((v, i) => +(v - min[i]).toFixed(2));
+    const size: [number, number, number] = [
+      +(max[0] - min[0]).toFixed(2), // width (X)
+      +(max[1] - min[1]).toFixed(2), // height (Y)
+      +(max[2] - min[2]).toFixed(2)  // depth (Z)
+    ];
+
+    // Infer front direction based on shape
+    let front: "Z+" | "X+" | null = null;
+    if (size[2] > size[0]) {
+      front = "Z+";
+    } else {
+      front = "X+";
+    }
+
     modelMeta[`/models/${file}`] = {
       size,
-      description: "TODO: Add description"
+      front,
+      description: "TODO: Add human-readable description"
     };
   }
 
-  // Save as meta.json (optional)
-  writeFileSync(join(modelDir, 'meta.json'), JSON.stringify(modelMeta, null, 2));
+  // Save metadata to file
+  const outputPath = join(modelDir, 'meta.json');
+  writeFileSync(outputPath, JSON.stringify(modelMeta, null, 2));
 
-  return new Response(JSON.stringify(modelMeta), {
+  return new Response(JSON.stringify(modelMeta, null, 2), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
   });
