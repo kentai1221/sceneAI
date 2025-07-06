@@ -23,7 +23,7 @@
       0.93,
       0.71
     ],
-    "front": "X-",
+    "front": "X+",
     "description": "TODO: Add human-readable description"
   },
   "/models/cctv.glb": {
@@ -68,7 +68,7 @@
       null,
       null
     ],
-    "front": "X+",
+    "front": "Z+",
     "description": "TODO: Add human-readable description"
   },
   "/models/fridge.glb": {
@@ -77,7 +77,7 @@
       1.65,
       0.64
     ],
-    "front": "X+",
+    "front": "Z+",
     "description": "TODO: Add human-readable description"
   },
   "/models/juice.glb": {
@@ -104,7 +104,7 @@
       0.35,
       0.53
     ],
-    "front": "Z+",
+    "front": "Z-",
     "description": "TODO: Add human-readable description"
   },
   "/models/poster1.glb": {
@@ -131,7 +131,7 @@
       2.05,
       0.71
     ],
-    "front": "Z+",
+    "front": "X+",
     "description": "TODO: Add human-readable description"
   },
   "/models/shelving.glb": {

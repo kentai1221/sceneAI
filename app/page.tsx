@@ -689,7 +689,7 @@ Respond ONLY with a valid JSON array. No markdown, code fences, or explanation.`
     <main className="flex flex-col h-screen bg-gray-50 text-gray-900">
       {/* Header */}
       <header className="bg-neutral-700 text-white shadow-md px-6 py-4 text-xl font-bold border-b border-gray-200">
-        Unity Scene AI
+        7-11 Store Scene AI
       </header>
 
       {showSketchModal && (
